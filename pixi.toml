@@ -1,10 +1,20 @@
 [workspace]
-authors = ["Steven Eisinger <seisinger@smart-robotics.nl>"]
+authors = ["Steven Eisinger <steven.a.eisinger@gmail.com>"]
 channels = ["conda-forge"]
 name = "monumental-interview"
 platforms = ["linux-64"]
 version = "0.1.0"
 
 [tasks]
+clean = "rm -rf $PIXI_PROJECT_ROOT/build"
+build = "bash $PIXI_PROJECT_ROOT/build.sh"
+start = "bash $PIXI_PROJECT_ROOT/run.sh"
+format = "clang-format -i -- $PIXI_PROJECT_ROOT/src/*.cpp || shfmt --write -i 4 -d $PIXI_PROJECT_ROOT"
 
 [dependencies]
+websocketpp = ">=0.8.2,<0.9"
+asio = ">=1.29.0,<2"
+qt6-main = ">=6.9.1,<7"
+clang = ">=20.1.7,<21"
+cmake = ">=3.28,<3.30"
+go-shfmt = ">=3.11.0,<4"
