@@ -13,9 +13,11 @@ format = "clang-format -i -- $PIXI_PROJECT_ROOT/src/*.cpp || shfmt --write -i 4 
 
 [dependencies]
 websocketpp = ">=0.8.2,<0.9"
-asio = ">=1.29.0,<2"
 qt6-main = ">=6.9.1,<7"
 cmake = ">=3.28,<3.30"
 go-shfmt = ">=3.11.0,<4"
 gcc_linux-64 = ">=15.1.0,<16"
 gxx_linux-64 = ">=15.1.0,<16"
+boost = ">=1.82.0,<2"
+glib = ">=2.84.2,<3"
+clang-format = ">=20.1.7,<21"
