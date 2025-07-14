@@ -9,7 +9,7 @@ version = "0.1.0"
 clean = "rm -rf $PIXI_PROJECT_ROOT/build"
 build = "bash $PIXI_PROJECT_ROOT/build.sh"
 start = "bash $PIXI_PROJECT_ROOT/run.sh"
-format = "clang-format -i -- $PIXI_PROJECT_ROOT/src/*.cpp || shfmt --write -i 4 -d $PIXI_PROJECT_ROOT"
+format = "clang-format -i -- $PIXI_PROJECT_ROOT/src/*.cpp $PIXI_PROJECT_ROOT/src/*.h || shfmt --write -i 4 -d $PIXI_PROJECT_ROOT"
 
 [dependencies]
 websocketpp = ">=0.8.2,<0.9"

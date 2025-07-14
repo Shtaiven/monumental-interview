@@ -3,6 +3,8 @@
 #include <websocketpp/client.hpp>
 #include <websocketpp/config/asio_no_tls_client.hpp>
 
+#include "robot.h"
+
 typedef websocketpp::client<websocketpp::config::asio_client> client;
 
 using websocketpp::lib::bind;
@@ -14,7 +16,44 @@ typedef websocketpp::config::asio_client::message_type::ptr message_ptr;
 
 // Called on every message from the websocket server
 void on_message(client *c, websocketpp::connection_hdl hdl, message_ptr msg) {
-  json j{json::parse(msg->get_payload(), nullptr, false)};
+  json j = json::parse(msg->get_payload(), nullptr, false);
+
+  // Check if the JSON is valid
+  if (j.is_discarded()) {
+    std::cout << "[ERROR] Received invalid JSON: " << msg->get_payload()
+              << std::endl;
+    return;
+  }
+
+  try {
+    // Convert JSON to robot::Sensors
+    auto sensors = j.template get<robot::Sensors>();
+
+    // Print the received sensors data
+    std::cout << "[INFO] Received sensors data: " << std::endl;
+    for (const auto &sensor : sensors.sensors) {
+      std::cout << "  Sensor Name: " << sensor.name << std::endl;
+      std::cout << "  Data: ";
+      for (const auto &value : sensor.data) {
+        std::cout << value << " ";
+      }
+      std::cout << std::endl;
+      std::cout << "  Unit: " << sensor.unit << std::endl;
+      std::cout << "  Timestamp: " << sensor.timestamp << std::endl;
+    }
+  } catch (const json::exception &e) {
+    std::cout << "[ERROR] JSON exception: " << e.what() << std::endl;
+    return;
+  }
+
+  // Send the next input data to the robot
+  robot::Input input;
+  input.v_left = 0;   // Example value for left wheel speed
+  input.v_right = 0;  // Example value for right wheel speed
+  json response = input;
+  c->send(hdl, response.dump(), websocketpp::frame::opcode::text);
+  std::cout << "[INFO] Sent input data: " << input.v_left << " "
+            << input.v_right << std::endl;
 }
 
 int main(int argc, char *argv[]) {
