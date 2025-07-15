@@ -3,7 +3,7 @@
 #include <websocketpp/client.hpp>
 #include <websocketpp/config/asio_no_tls_client.hpp>
 
-#include "robot.h"
+#include "robot_client.h"
 
 typedef websocketpp::client<websocketpp::config::asio_client> client;
 
@@ -26,8 +26,8 @@ void on_message(client *c, websocketpp::connection_hdl hdl, message_ptr msg) {
   }
 
   try {
-    // Convert JSON to robot::Sensors
-    auto sensors = j.template get<robot::Sensors>();
+    // Convert JSON to robot_client::Sensors
+    auto sensors = j.template get<robot_client::Sensors>();
 
     // Print the received sensors data
     std::cout << "[INFO] Received sensors data: " << std::endl;
@@ -47,7 +47,7 @@ void on_message(client *c, websocketpp::connection_hdl hdl, message_ptr msg) {
   }
 
   // Send the next input data to the robot
-  robot::Input input;
+  robot_client::Input input;
   input.v_left = 0;   // Example value for left wheel speed
   input.v_right = 0;  // Example value for right wheel speed
   json response = input;
@@ -70,9 +70,10 @@ int main(int argc, char *argv[]) {
 
   try {
     // Websocket client setup
-    c.set_access_channels(websocketpp::log::alevel::connect |
-                          websocketpp::log::alevel::disconnect);
-    c.clear_access_channels(websocketpp::log::alevel::frame_payload);
+    c.clear_access_channels(websocketpp::log::alevel::all);
+    c.set_access_channels(websocketpp::log::alevel::connect);
+    c.set_access_channels(websocketpp::log::alevel::disconnect);
+    c.set_access_channels(websocketpp::log::alevel::app);
 
     c.init_asio();
     c.set_message_handler(bind(&on_message, &c, ::_1, ::_2));

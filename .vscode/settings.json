@@ -1,0 +1,8 @@
+{
+    "files.associations": {
+        "*.p8": "lua",
+        "**/.i3/config": "i3",
+        "**/i3/config": "i3",
+        "functional": "cpp"
+    }
+}
