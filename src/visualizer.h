@@ -8,7 +8,7 @@ class Visualizer : public QWidget {
 
    public:
     explicit Visualizer(QWidget *parent = nullptr);
-    void updatePosition(double x, double y, double dx = 0.0, double dy = 0.0);
+    void updatePosition(double x, double y);
 
    protected:
     void paintEvent(QPaintEvent *event) override;

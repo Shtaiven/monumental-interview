@@ -7,19 +7,28 @@ Visualizer::Visualizer(QWidget *parent)
     setFixedSize(800, 600);  // Set the window size
 }
 
-void Visualizer::updatePosition(double x, double y, double dx, double dy) {
+void Visualizer::updatePosition(double x, double y) {
     robotX = 400 + x * 10.0;
     robotY = 300 - y * 10.0;
 
-    // Only update heading if movement occurred
+    // Store previous position and compute movement vector
+    static double lastX = x;
+    static double lastY = y;
     static double lastDX = 1.0;  // Default to pointing right
     static double lastDY = 0.0;
+
+    double dx = x - lastX;
+    double dy = y - lastY;
+
     if (std::abs(dx) > 1e-6 || std::abs(dy) > 1e-6) {
         lastDX = dx;
         lastDY = dy;
     }
     headingDX = lastDX;
     headingDY = lastDY;
+
+    lastX = x;
+    lastY = y;
 
     update();
 }

@@ -35,14 +35,14 @@ void message_cb(robot_client::RobotClient *c,
 
             // Update the visualizer with the new position and orientation
             if (visualizer) {
-                visualizer->updatePosition(x, y, dx, dy);
+                visualizer->updatePosition(x, y);
             }
         }
     }
 
     // Send the next input data to the robot
     auto input = controller(sensors);
-    c->send_input_message(input);
+    c->sendInputMessage(input);
 
     std::cout << "[INFO] Sent input data: " << input.v_left << " "
               << input.v_right << std::endl;

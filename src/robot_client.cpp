@@ -21,7 +21,7 @@ RobotClient::RobotClient() : connected_(false) {
 
     client_.init_asio();
 
-    client_.set_message_handler(bind(&RobotClient::on_message, this, _1, _2));
+    client_.set_message_handler(bind(&RobotClient::onMessage, this, _1, _2));
 }
 
 RobotClient::~RobotClient() {
@@ -50,7 +50,7 @@ bool RobotClient::connect(const std::string &uri) {
 }
 
 // Called on every message from the websocket server
-void RobotClient::on_message(
+void RobotClient::onMessage(
     websocketpp::connection_hdl hdl,
     websocketpp::config::asio_client::message_type::ptr msg) {
     json j = json::parse(msg->get_payload(), nullptr, false);
@@ -88,7 +88,7 @@ void RobotClient::on_message(
     }
 }
 
-void RobotClient::send_input_message(Input input) {
+void RobotClient::sendInputMessage(Input input) {
     json response = input;
     client_.send(connection_hdl_, response.dump(),
                  websocketpp::frame::opcode::text);

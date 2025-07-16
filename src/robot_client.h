@@ -48,11 +48,11 @@ class RobotClient {
     bool connect(const std::string &uri);
     void run();
     void set_message_cb(MessageCallback cb) { message_cb_ = cb; };
-    void send_input_message(Input input);
+    void sendInputMessage(Input input);
 
    private:
-    void on_message(websocketpp::connection_hdl hdl,
-                    websocketpp::config::asio_client::message_type::ptr msg);
+    void onMessage(websocketpp::connection_hdl hdl,
+                   websocketpp::config::asio_client::message_type::ptr msg);
 
     websocketpp::client<websocketpp::config::asio_client> client_;
     websocketpp::connection_hdl connection_hdl_;
