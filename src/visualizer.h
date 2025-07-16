@@ -2,6 +2,8 @@
 
 #include <QPainter>
 #include <QWidget>
+#include <deque>
+#include <QPointF>
 
 class Visualizer : public QWidget {
     Q_OBJECT
@@ -18,4 +20,5 @@ class Visualizer : public QWidget {
     double robotY;
     double headingDX;
     double headingDY;
+    std::deque<QPointF> trail; // Add this line
 };

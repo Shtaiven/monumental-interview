@@ -23,6 +23,11 @@ void Visualizer::updatePosition(double x, double y) {
     if (std::abs(dx) > 1e-6 || std::abs(dy) > 1e-6) {
         lastDX = dx;
         lastDY = dy;
+        // Only add to trail if position changed
+        trail.push_back(QPointF(robotX, robotY));
+        if (trail.size() > 10) {
+            trail.pop_front();
+        }
     }
     headingDX = lastDX;
     headingDY = lastDY;
@@ -41,6 +46,7 @@ void Visualizer::paintEvent(QPaintEvent *event) {
     painter.fillRect(rect(), Qt::black);
 
     // Draw the robot body
+    painter.setPen(Qt::NoPen);
     painter.setBrush(Qt::red);
     painter.drawEllipse(QPointF(robotX, robotY), 10, 10);
 
@@ -55,8 +61,7 @@ void Visualizer::paintEvent(QPaintEvent *event) {
     if (norm > 1e-6) {
         // Heading line
         hx += (headingDX / norm) * headingLength;
-        hy -= (headingDY / norm) *
-              headingLength;  // minus because screen y is inverted
+        hy -= (headingDY / norm) * headingLength;  // minus because screen y is inverted
 
         // Perpendicular vector for wheels
         double perpDX = -headingDY / norm;
@@ -83,4 +88,13 @@ void Visualizer::paintEvent(QPaintEvent *event) {
     // Draw heading line
     painter.setPen(QPen(Qt::yellow, 2));
     painter.drawLine(QPointF(robotX, robotY), QPointF(hx, hy));
+
+    // Draw the trail above everything else
+    if (trail.size() > 1) {
+        painter.setPen(QPen(Qt::green, 2));
+        painter.setBrush(Qt::NoBrush); // No fill for trail
+        for (size_t i = 1; i < trail.size(); ++i) {
+            painter.drawLine(trail[i - 1], trail[i]);
+        }
+    }
 }
