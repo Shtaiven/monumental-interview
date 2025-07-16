@@ -1,4 +1,5 @@
 #include <QApplication>
+#include <cmath>
 #include <iostream>
 
 #include "controller.h"
@@ -12,15 +13,29 @@ Visualizer *visualizer = nullptr;
 
 void message_cb(robot_client::RobotClient *c,
                 const robot_client::Sensors sensors) {
-    // Extract GPS data from sensors
+    static double last_x = 0.0;
+    static double last_y = 0.0;
+    static double last_theta = 0.0;
+    static bool has_last = false;
+
     for (const auto &sensor : sensors.sensors) {
         if (sensor.name == "gps" && sensor.data.size() >= 2) {
             double x = sensor.data[0];  // GPS x-coordinate
             double y = sensor.data[1];  // GPS y-coordinate
 
-            // Update the visualizer with the new position
+            double dx = 0.0;
+            double dy = 0.0;
+            if (has_last) {
+                dx = x - last_x;
+                dy = y - last_y;
+            }
+            last_x = x;
+            last_y = y;
+            has_last = true;
+
+            // Update the visualizer with the new position and orientation
             if (visualizer) {
-                visualizer->updatePosition(x, y);
+                visualizer->updatePosition(x, y, dx, dy);
             }
         }
     }
