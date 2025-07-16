@@ -1,19 +1,18 @@
 #include <iostream>
 
+#include "controller.h"
 #include "robot_client.h"
+#include "visualizer.h"
 
 using json = nlohmann::json;
 using client = websocketpp::client<websocketpp::config::asio_client>;
 
-void message_cb(robot_client::RobotClient *c, const robot_client::Sensors) {
+void message_cb(robot_client::RobotClient *c,
+                const robot_client::Sensors sensors) {
     // TODO: Connect to visualizer socket
 
-    // TODO: Implement controller
     // Send the next input data to the robot
-    robot_client::Input input{
-        .v_left = 0,  // Example value for left wheel speed
-        .v_right = 0  // Example value for right wheel speed
-    };
+    auto input = controller(sensors);
 
     c->send_input_message(input);
 
