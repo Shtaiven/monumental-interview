@@ -18,6 +18,9 @@ add_executable(
     robot-client
     src/main.cpp
     src/robot_client.h
+    src/robot_client.cpp
+    src/visualizer.h
+    src/visualizer.cpp
 )
 target_link_libraries(robot-client PRIVATE nlohmann_json::nlohmann_json)
 

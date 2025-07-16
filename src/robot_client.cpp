@@ -5,12 +5,14 @@
 #include <websocketpp/client.hpp>
 #include <websocketpp/config/asio_no_tls_client.hpp>
 
+using websocketpp::lib::bind;
+using websocketpp::lib::placeholders::_1;
+using websocketpp::lib::placeholders::_2;
 using json = nlohmann::json;
 
 namespace robot_client {
 
 RobotClient::RobotClient() : connected_(false) {
-  try {
     // Websocket client setup
     client_.clear_access_channels(websocketpp::log::alevel::all);
     client_.set_access_channels(websocketpp::log::alevel::connect);
@@ -19,32 +21,79 @@ RobotClient::RobotClient() : connected_(false) {
 
     client_.init_asio();
 
-    using websocketpp::lib::bind;
-    using websocketpp::lib::placeholders::_1;
-    using websocketpp::lib::placeholders::_2;
     client_.set_message_handler(bind(&RobotClient::on_message, this, _1, _2));
+}
 
-  } catch (websocketpp::exception const &e) {
-    std::cout << e.what() << std::endl;
-  }
+RobotClient::~RobotClient() {
+    if (connected_) {
+        client_.close(connection_hdl_, websocketpp::close::status::normal,
+                      "RobotClient connection closed");
+    }
 }
 
 bool RobotClient::connect(const std::string &uri) {
-  uri_ = uri;
-  websocketpp::lib::error_code ec;
+    uri_ = uri;
+    websocketpp::lib::error_code ec;
 
-  auto con = client_.get_connection(uri_, ec);
-  if (ec) {
-    std::cout << "[ERROR] Could not create connection: " << ec.message()
-              << std::endl;
-    return false;
-  }
+    auto con = client_.get_connection(uri_, ec);
+    if (ec) {
+        std::cout << "[ERROR] Could not create connection: " << ec.message()
+                  << std::endl;
+        return false;
+    }
 
-  connection_hdl_ = con->get_handle();
+    connection_hdl_ = con->get_handle();
 
-  client_.connect(con);
-  connected_ = true;
-  return true;
+    client_.connect(con);
+    connected_ = true;
+    return true;
 }
+
+// Called on every message from the websocket server
+void RobotClient::on_message(
+    websocketpp::connection_hdl hdl,
+    websocketpp::config::asio_client::message_type::ptr msg) {
+    json j = json::parse(msg->get_payload(), nullptr, false);
+
+    // Check if the JSON is valid
+    if (j.is_discarded()) {
+        std::cout << "[ERROR] Received invalid JSON: " << msg->get_payload()
+                  << std::endl;
+        return;
+    }
+
+    try {
+        // Convert JSON to robot_client::Sensors
+        auto sensors = j.template get<robot_client::Sensors>();
+
+        // Print the received sensors data
+        std::cout << "[INFO] Received sensors data: " << std::endl;
+        for (const auto &sensor : sensors.sensors) {
+            std::cout << "  Sensor Name: " << sensor.name << std::endl;
+            std::cout << "  Data: ";
+            for (const auto &value : sensor.data) {
+                std::cout << value << " ";
+            }
+            std::cout << std::endl;
+            std::cout << "  Unit: " << sensor.unit << std::endl;
+            std::cout << "  Timestamp: " << sensor.timestamp << std::endl;
+        }
+
+        // Call the custom message callback
+        if (message_cb_) {
+            message_cb_(this, sensors);
+        }
+    } catch (const json::exception &e) {
+        std::cout << "[ERROR] JSON exception: " << e.what() << std::endl;
+    }
+}
+
+void RobotClient::send_input_message(Input input) {
+    json response = input;
+    client_.send(connection_hdl_, response.dump(),
+                 websocketpp::frame::opcode::text);
+}
+
+void RobotClient::run() { client_.run(); }
 
 }  // namespace robot_client
