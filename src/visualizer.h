@@ -1,9 +1,9 @@
 #pragma once
 
 #include <QPainter>
+#include <QPointF>
 #include <QWidget>
 #include <deque>
-#include <QPointF>
 
 class Visualizer : public QWidget {
     Q_OBJECT
@@ -20,5 +20,5 @@ class Visualizer : public QWidget {
     double robotY;
     double headingDX;
     double headingDY;
-    std::deque<QPointF> trail; // Add this line
+    std::deque<QPointF> trail;  // Add this line
 };
