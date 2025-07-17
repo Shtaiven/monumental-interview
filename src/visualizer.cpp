@@ -9,8 +9,8 @@ Visualizer::Visualizer(QWidget *parent)
 }
 
 void Visualizer::updatePosition(double x, double y) {
-    robot_x = window_width / 2.0 + x * size_multiplier;
-    robot_y = window_height / 2.0 - y * size_multiplier;
+    robot_x = width() / 2.0 + x * size_multiplier;
+    robot_y = height() / 2.0 - y * size_multiplier;
 
     // Store previous position and compute movement vector
     static double last_x = x;
@@ -49,8 +49,8 @@ QPainterPath Visualizer::drawPath(
 
     for (double t = start; t < stop; t += step) {
         auto p = path_func(t);
-        QPointF point(window_width / 2.0 + p.x * size_multiplier,
-                      window_height / 2.0 - p.y * size_multiplier);
+        QPointF point(width() / 2.0 + p.x * size_multiplier,
+                      height() / 2.0 - p.y * size_multiplier);
         if (t == start) {
             path.moveTo(point);
         } else {
