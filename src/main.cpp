@@ -15,23 +15,17 @@ void message_cb(robot_client::RobotClient *c,
                 const robot_client::Sensors sensors) {
     static double last_x = 0.0;
     static double last_y = 0.0;
-    static double last_theta = 0.0;
-    static bool has_last = false;
 
+    // Update visualizer with sensor data
     for (const auto &sensor : sensors.sensors) {
         if (sensor.name == "gps" && sensor.data.size() >= 2) {
             double x = sensor.data[0];  // GPS x-coordinate
             double y = sensor.data[1];  // GPS y-coordinate
 
-            double dx = 0.0;
-            double dy = 0.0;
-            if (has_last) {
-                dx = x - last_x;
-                dy = y - last_y;
-            }
+            double dx = 0.0 - last_x;
+            double dy = 0.0 - last_y;
             last_x = x;
             last_y = y;
-            has_last = true;
 
             // Update the visualizer with the new position and orientation
             if (visualizer) {
@@ -40,8 +34,10 @@ void message_cb(robot_client::RobotClient *c,
         }
     }
 
-    // Send the next input data to the robot
+    // Compute the next robot input
     auto input = controller(sensors);
+
+    // Send the next input data to the robot
     c->sendInputMessage(input);
 
     std::cout << "[INFO] Sent input data: " << input.v_left << " "
@@ -49,15 +45,8 @@ void message_cb(robot_client::RobotClient *c,
 }
 
 int main(int argc, char *argv[]) {
-    QApplication app(argc, argv);
-
-    // Create the visualizer window
-    Visualizer vis;
-    visualizer = &vis;
-    vis.show();
-
+    // Handle args
     std::string uri = "ws://localhost:9002";
-
     if (argc == 2) {
         uri = argv[1];
     } else {
@@ -65,6 +54,17 @@ int main(int argc, char *argv[]) {
                   << std::endl;
         return 0;
     }
+
+    QApplication app(argc, argv);
+
+    // Create the visualizer window
+    Visualizer vis;
+    visualizer = &vis;
+
+    // Draw the path in the visualizer
+    vis.setPathFunction(path_generator::eval, 0, 21, 0.1);
+
+    vis.show();
 
     try {
         auto c = robot_client::RobotClient();

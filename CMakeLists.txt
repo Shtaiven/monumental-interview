@@ -25,6 +25,8 @@ add_executable(
     src/visualizer.cpp
     src/controller.h
     src/controller.cpp
+    src/path_generator.h
+    src/path_generator.cpp
 )
 
 target_link_libraries(robot-client PRIVATE nlohmann_json::nlohmann_json Qt6::Widgets)
