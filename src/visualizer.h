@@ -28,6 +28,9 @@ class Visualizer : public QWidget {
                           double start, double stop, double step);
 
    private:
+    const double size_multiplier = 80;
+    const double window_width = 800;
+    const double window_height = 800;
     QPainter painter;
     double robot_x;
     double robot_y;

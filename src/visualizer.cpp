@@ -5,12 +5,12 @@
 
 Visualizer::Visualizer(QWidget *parent)
     : QWidget(parent), robot_x(0), robot_y(0), heading_dx(0), heading_dy(0) {
-    setFixedSize(800, 600);  // Set the window size
+    setFixedSize(window_width, window_height);  // Set the window size
 }
 
 void Visualizer::updatePosition(double x, double y) {
-    robot_x = 400 + x * 10.0;
-    robot_y = 300 - y * 10.0;
+    robot_x = window_width / 2.0 + x * size_multiplier;
+    robot_y = window_height / 2.0 - y * size_multiplier;
 
     // Store previous position and compute movement vector
     static double last_x = x;
@@ -49,7 +49,8 @@ QPainterPath Visualizer::drawPath(
 
     for (double t = start; t < stop; t += step) {
         auto p = path_func(t);
-        QPointF point(400 + p.x * 10.0, 300 - p.y * 10.0);
+        QPointF point(window_width / 2.0 + p.x * size_multiplier,
+                      window_height / 2.0 - p.y * size_multiplier);
         if (t == start) {
             path.moveTo(point);
         } else {
@@ -77,13 +78,15 @@ void Visualizer::paintEvent(QPaintEvent *event) {
     // Draw the robot body
     painter.setPen(Qt::NoPen);
     painter.setBrush(Qt::red);
-    painter.drawEllipse(QPointF(robot_x, robot_y), 10, 10);
+    painter.drawEllipse(QPointF(robot_x, robot_y), 0.25 * size_multiplier,
+                        0.25 * size_multiplier);
 
-    double wheel_offset = 12.0;  // distance from center to wheel
-    double wheel_radius = 4.0;
+    double wheel_offset =
+        0.25 * size_multiplier;  // distance from center to wheel
+    double wheel_radius = 0.1 * size_multiplier;  // radius of wheels
 
     // Draw heading indicator (yellow line in direction of movement)
-    double heading_length = 18.0;
+    double heading_length = 0.4 * size_multiplier;
     double norm = std::sqrt(heading_dx * heading_dx + heading_dy * heading_dy);
     double hx = robot_x, hy = robot_y;
     double wx1 = robot_x, wy1 = robot_y, wx2 = robot_x, wy2 = robot_y;
