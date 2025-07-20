@@ -39,6 +39,18 @@ static std::optional<int64_t> stringToTimestampMillis(
     return millis;
 }
 
+double RobotModel::getLifetimeSeconds() const {
+    if (!angular_vel_time_.has_value() || !gps_pos_time_.has_value() ||
+        !start_time_.has_value()) {
+        return 0.0;
+    }
+
+    return (std::max(angular_vel_time_.value_or(0.0),
+                     gps_pos_time_.value_or(0.0)) -
+            start_time_.value_or(0.0)) /
+           1000.0;
+}
+
 void RobotModel::update(const robot_client::Sensors &sensors) {
     // Update robot state based on sensor data
     for (const auto &sensor : sensors.sensors) {
@@ -59,6 +71,13 @@ void RobotModel::update(const robot_client::Sensors &sensors) {
         }
     }
 
+    // Get the start time if it wasn't already obtained
+    if (!start_time_.has_value() && angular_vel_time_.has_value() &&
+        gps_pos_time_.has_value()) {
+        start_time_ = std::min(angular_vel_time_.value_or(0.0),
+                               gps_pos_time_.value_or(0.0));
+    }
+
     // Update robot model
     computePosition();
 }
@@ -66,15 +85,16 @@ void RobotModel::update(const robot_client::Sensors &sensors) {
 void RobotModel::computePosition() {
     // Only update gps position data if we have new data
     // Consider it ground truth
-    bool gps_data_updated =
-        gps_pos_time_.has_value() && last_gps_pos_time_ != gps_pos_time_;
-    if (gps_data_updated) {
-        pos_ = gps_pos_;
-    }
+    // bool gps_data_updated =
+    //     gps_pos_time_.has_value() && last_gps_pos_time_ != gps_pos_time_;
+    // if (gps_data_updated) {
+    //     pos_ = gps_pos_;
+    // }
 
     // Early exit if we don't have a new sensor value
     if (!angular_vel_time_.has_value() || !last_angular_vel_time_.has_value() ||
         (last_angular_vel_time_ == angular_vel_time_)) {
+        std::cout << "[WARN] No new gyro sensor values" << std::endl;
         return;
     }
 
@@ -82,8 +102,7 @@ void RobotModel::computePosition() {
     // https://www.cs.columbia.edu/~allen/F17/NOTES/icckinematics.pdf
 
     // Compute the distance to the instantaneous center of curvature
-    double icc_distance =
-        (axle_length_ / 2.0) * (v_left_ + v_right_) / (v_right_ - v_left_);
+    double icc_distance = (axle_length_ / 2.0) * (v_left_ + v_right_) / (v_right_ - v_left_);
 
     // Compute the instantaneous center of curvature
     Vec2 icc{pos_.x - icc_distance * std::sin(theta_),
@@ -94,11 +113,16 @@ void RobotModel::computePosition() {
     if (last_angular_vel_time_.has_value()) {
         dt = (*angular_vel_time_ - *last_angular_vel_time_) /
              1000.0;  // Convert ms to seconds
-    }
+            }
 
     double theta_diff = angular_vel_ * dt;
 
-    // Use gyro data to update theta
+    std::cout << "[DEBUG] dt: " << dt << "s" << std::endl;
+    std::cout << "[DEBUG] theta_diff: " << theta_diff << "rad" << std::endl;
+    std::cout << "[DEBUG] icc: " << icc.x << " " << icc.y << std::endl;
+
+    // TODO: Implement special motion equations when v_right_ = =/- v_left_
+    // Update the position
     pos_.x = std::cos(theta_diff) * (pos_.x - icc.x) -
              std::sin(theta_diff) * (pos_.y - icc.y) + icc.x;
     pos_.y = std::sin(theta_diff) * (pos_.x - icc.x) +

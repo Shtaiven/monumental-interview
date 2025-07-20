@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cmath>
 #include <optional>
 
 #include "robot_client.h"
@@ -18,8 +19,9 @@ class RobotModel {
         v_left_ = v_left;
         v_right_ = v_right;
     }
-    Vec2 getPosition() { return pos_; }
-    double getOrientation() { return theta_; }
+    Vec2 getPosition() const { return pos_; }
+    double getOrientation() const { return theta_; }
+    double getLifetimeSeconds() const;
 
    private:
     void computePosition();
@@ -34,6 +36,8 @@ class RobotModel {
     double angular_vel_ = 0.0;      // Angular velocity (rad/s)
     double v_left_ = 0.0;           // Velocity of the left wheel (m/s)
     double v_right_ = 0.0;          // Velocity of the right wheel (m/s)
+    std::optional<int64_t> start_time_ =
+        std::nullopt;  // start time for the lifetime computation
     std::optional<int64_t> linear_acc_time_ =
         std::nullopt;  // Timestamp for linear acceleration
     std::optional<int64_t> last_linear_acc_time_ =

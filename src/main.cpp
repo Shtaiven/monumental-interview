@@ -16,12 +16,25 @@ Visualizer *visualizer = nullptr;
 void message_cb(robot_client::RobotClient *c,
                 const robot_client::Sensors sensors) {
     static robot_model::RobotModel robot_model;
+    static double time_elapsed_s = 0.0;
 
-    // Update the robot model with the time elapsed and new sensor data
+    // Update the robot model with new sensor data
     robot_model.update(sensors);
 
+    auto lifetime = robot_model.getLifetimeSeconds();
+    auto pos = robot_model.getPosition();
+    auto theta = robot_model.getOrientation();
+
+    std::cout << "[INFO] Current state:" << std::endl;
+    std::cout << "  lifetime: " << lifetime << "s" << std::endl;
+    std::cout << "  position: " << pos.x << " " << pos.y << std::endl;
+    std::cout << "  theta: " << theta << "rad" << std::endl;
+
+    auto setpoint = path_generator::eval(lifetime);
+    std::cout << "[INFO] Setpoint: " << setpoint.x << " " << setpoint.y << std::endl;
+
     // Compute the next robot input
-    auto input = controller(robot_model, path_generator::eval(0.0));
+    auto input = controller(robot_model, path_generator::eval(lifetime));
 
     // Update the velocities in the model
     robot_model.setVelocity(input.v_left, input.v_right);
@@ -32,6 +45,7 @@ void message_cb(robot_client::RobotClient *c,
     std::cout << "[INFO] Sent input data: " << input.v_left << " "
               << input.v_right << std::endl;
 
+    // TODO: pass robot model to visualizer instead
     // Update the visualizer with the new position and orientation
     if (visualizer) {
         auto pos = robot_model.getPosition();
