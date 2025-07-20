@@ -16,17 +16,11 @@ find_package(Qt6 REQUIRED COMPONENTS Core Widgets)
 
 include_directories(include lib)
 
+file(GLOB_RECURSE SOURCE_FILES src/*.cpp src/*.h)
+
 add_executable(
     robot-client
-    src/main.cpp
-    src/robot_client.h
-    src/robot_client.cpp
-    src/visualizer.h
-    src/visualizer.cpp
-    src/controller.h
-    src/controller.cpp
-    src/path_generator.h
-    src/path_generator.cpp
+    ${SOURCE_FILES}
 )
 
 target_link_libraries(robot-client PRIVATE nlohmann_json::nlohmann_json Qt6::Widgets)

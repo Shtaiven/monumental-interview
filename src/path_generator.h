@@ -1,11 +1,8 @@
 #pragma once
 
-namespace path_generator {
+#include "types.h"
 
-struct Point {
-    double x;
-    double y;
-};
+namespace path_generator {
 
 Point eval(double t);
 

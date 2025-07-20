@@ -39,9 +39,8 @@ void Visualizer::updatePosition(double x, double y) {
     update();
 }
 
-QPainterPath Visualizer::drawPath(
-    std::function<path_generator::Point(double)> path_func, double start,
-    double stop, double step) {
+QPainterPath Visualizer::drawPath(std::function<Point(double)> path_func,
+                                  double start, double stop, double step) {
     QPainterPath path;
     if (!path_func) {
         return path;  // No path function set

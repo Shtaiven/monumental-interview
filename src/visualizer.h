@@ -6,7 +6,7 @@
 #include <QWidget>
 #include <deque>
 
-#include "path_generator.h"
+#include "types.h"
 
 class Visualizer : public QWidget {
     Q_OBJECT
@@ -14,8 +14,8 @@ class Visualizer : public QWidget {
    public:
     explicit Visualizer(QWidget *parent = nullptr);
     void updatePosition(double x, double y);
-    void setPathFunction(std::function<path_generator::Point(double)> func,
-                         double start, double stop, double step) {
+    void setPathFunction(std::function<Point(double)> func, double start,
+                         double stop, double step) {
         path_func = func;
         path_start = start;
         path_stop = stop;
@@ -24,8 +24,8 @@ class Visualizer : public QWidget {
 
    protected:
     void paintEvent(QPaintEvent *event) override;
-    QPainterPath drawPath(std::function<path_generator::Point(double)> func,
-                          double start, double stop, double step);
+    QPainterPath drawPath(std::function<Point(double)> func, double start,
+                          double stop, double step);
 
    private:
     const double size_multiplier = 80;
@@ -36,7 +36,7 @@ class Visualizer : public QWidget {
     double robot_y;
     double heading_dx;
     double heading_dy;
-    std::function<path_generator::Point(double)> path_func = NULL;
+    std::function<Point(double)> path_func = nullptr;
     double path_start;
     double path_stop;
     double path_step;
