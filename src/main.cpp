@@ -18,10 +18,13 @@ void message_cb(robot_client::RobotClient *c,
     static robot_model::RobotModel robot_model;
 
     // Update the robot model with the time elapsed and new sensor data
-    robot_model.update(0.1, sensors);
+    robot_model.update(sensors);
 
     // Compute the next robot input
     auto input = controller(robot_model, path_generator::eval(0.0));
+
+    // Update the velocities in the model
+    robot_model.setVelocity(input.v_left, input.v_right);
 
     // Send the next input data to the robot
     c->sendInputMessage(input);

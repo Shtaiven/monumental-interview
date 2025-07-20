@@ -14,7 +14,7 @@ class Visualizer : public QWidget {
    public:
     explicit Visualizer(QWidget *parent = nullptr);
     void updatePosition(double x, double y);
-    void setPathFunction(std::function<Point(double)> func, double start,
+    void setPathFunction(std::function<Vec2(double)> func, double start,
                          double stop, double step) {
         path_func = func;
         path_start = start;
@@ -24,7 +24,7 @@ class Visualizer : public QWidget {
 
    protected:
     void paintEvent(QPaintEvent *event) override;
-    QPainterPath drawPath(std::function<Point(double)> func, double start,
+    QPainterPath drawPath(std::function<Vec2(double)> func, double start,
                           double stop, double step);
 
    private:
@@ -36,7 +36,7 @@ class Visualizer : public QWidget {
     double robot_y;
     double heading_dx;
     double heading_dy;
-    std::function<Point(double)> path_func = nullptr;
+    std::function<Vec2(double)> path_func = nullptr;
     double path_start;
     double path_stop;
     double path_step;

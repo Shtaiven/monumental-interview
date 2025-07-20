@@ -5,4 +5,4 @@
 #include "types.h"
 
 robot_client::Input controller(const robot_model::RobotModel &model,
-                               const Point &setpoint);
+                               const Vec2 &setpoint);

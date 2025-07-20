@@ -39,7 +39,7 @@ void Visualizer::updatePosition(double x, double y) {
     update();
 }
 
-QPainterPath Visualizer::drawPath(std::function<Point(double)> path_func,
+QPainterPath Visualizer::drawPath(std::function<Vec2(double)> path_func,
                                   double start, double stop, double step) {
     QPainterPath path;
     if (!path_func) {

@@ -4,6 +4,6 @@
 
 namespace path_generator {
 
-Point eval(double t);
+Vec2 eval(double t);
 
 }  // namespace path_generator
