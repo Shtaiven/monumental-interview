@@ -21,6 +21,10 @@ class Visualizer : public QWidget {
         path_stop = stop;
         path_step = step;
     }
+    void setSetpoint(double x, double y) {
+        setpoint_x = x;
+        setpoint_y = y;
+    }
 
    protected:
     void paintEvent(QPaintEvent *event) override;
@@ -32,10 +36,12 @@ class Visualizer : public QWidget {
     const double window_width = 800;
     const double window_height = 800;
     QPainter painter;
-    double robot_x;
-    double robot_y;
-    double heading_dx;
-    double heading_dy;
+    double robot_x = 0;
+    double robot_y = 0;
+    double heading_dx = 0;
+    double heading_dy = 0;
+    double setpoint_x = 0;
+    double setpoint_y = 0;
     std::function<Vec2(double)> path_func = nullptr;
     double path_start;
     double path_stop;

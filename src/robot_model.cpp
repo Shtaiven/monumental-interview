@@ -85,11 +85,11 @@ void RobotModel::update(const robot_client::Sensors &sensors) {
 void RobotModel::computePosition() {
     // Only update gps position data if we have new data
     // Consider it ground truth
-    bool gps_data_updated =
-        gps_pos_time_.has_value() && last_gps_pos_time_ != gps_pos_time_;
-    if (gps_data_updated) {
-        pos_ = gps_pos_;
-    }
+    // bool gps_data_updated =
+    //     gps_pos_time_.has_value() && last_gps_pos_time_ != gps_pos_time_;
+    // if (gps_data_updated) {
+    //     pos_ = gps_pos_;
+    // }
 
     // Early exit if we don't have a new sensor value
     if (!angular_vel_time_.has_value() || !last_angular_vel_time_.has_value() ||

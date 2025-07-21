@@ -129,4 +129,13 @@ void Visualizer::paintEvent(QPaintEvent *event) {
             painter.drawLine(trail[i - 1], trail[i]);
         }
     }
+
+    // Draw the setpoint as a cyan "X"
+    double sx = width() / 2.0 + setpoint_x * size_multiplier;
+    double sy = height() / 2.0 - setpoint_y * size_multiplier;
+    double x_size = 0.2 * size_multiplier;
+
+    painter.setPen(QPen(Qt::cyan, 2));
+    painter.drawLine(QPointF(sx - x_size, sy - x_size), QPointF(sx + x_size, sy + x_size));
+    painter.drawLine(QPointF(sx - x_size, sy + x_size), QPointF(sx + x_size, sy - x_size));
 }

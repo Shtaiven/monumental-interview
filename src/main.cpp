@@ -50,6 +50,7 @@ void message_cb(robot_client::RobotClient *c,
     // Update the visualizer with the new position and orientation
     if (visualizer) {
         auto pos = robot_model.getPosition();
+        visualizer->setSetpoint(setpoint.x, setpoint.y);
         visualizer->updatePosition(pos.x, pos.y);
     }
 }
