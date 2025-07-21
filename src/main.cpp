@@ -31,7 +31,8 @@ void message_cb(robot_client::RobotClient *c,
     std::cout << "  theta: " << theta << "rad" << std::endl;
 
     auto setpoint = path_generator::eval(lifetime);
-    std::cout << "[INFO] Setpoint: " << setpoint.x << " " << setpoint.y << std::endl;
+    std::cout << "[INFO] Setpoint: " << setpoint.x << " " << setpoint.y
+              << std::endl;
 
     // Compute the next robot input
     auto input = controller(robot_model, path_generator::eval(lifetime));
