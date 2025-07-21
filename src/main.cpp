@@ -31,6 +31,7 @@ void message_cb(robot_client::RobotClient *c,
     std::cout << "  position: " << pos.x << " " << pos.y << std::endl;
     std::cout << "  theta: " << theta << "rad" << std::endl;
 
+    // Get the point in the path to target
     auto setpoint = path_generator::eval(path_eval_time);
     std::cout << "[INFO] Setpoint: " << setpoint.x << " " << setpoint.y
               << std::endl;
@@ -44,12 +45,9 @@ void message_cb(robot_client::RobotClient *c,
                                 distance_vec.y * distance_vec.y);
     std::cout << "[INFO] Distance to target: " << distance << std::endl;
     // If the setpoint is reached, then set the next setpoint
-    if (distance <= 0.1 && path_eval_time <= 20) {
+    if (distance <= 0.2 && path_eval_time <= 20) {
         path_eval_time += 0.25;
     }
-
-    // Update the velocities in the model
-    robot_model.setVelocity(input.v_left, input.v_right);
 
     // Send the next input data to the robot
     c->sendInputMessage(input);

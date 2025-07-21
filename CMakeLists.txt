@@ -13,6 +13,7 @@ set(CMAKE_AUTOMOC ON)
 
 find_package(nlohmann_json 3.12.0 REQUIRED)
 find_package(Qt6 REQUIRED COMPONENTS Core Widgets)
+find_package(Eigen3 REQUIRED)
 
 include_directories(include lib)
 
@@ -23,7 +24,7 @@ add_executable(
     ${SOURCE_FILES}
 )
 
-target_link_libraries(robot-client PRIVATE nlohmann_json::nlohmann_json Qt6::Widgets)
+target_link_libraries(robot-client PRIVATE nlohmann_json::nlohmann_json Qt6::Widgets Eigen3::Eigen)
 
 include(CTest)
 enable_testing()

@@ -2,29 +2,33 @@
 
 #include <cmath>
 #include <optional>
+#include <Eigen/Dense>
 
 #include "robot_client.h"
 #include "types.h"
 
 namespace robot_model {
 
+struct EKFState {
+    Eigen::Matrix<double, 5, 1> x; // [x, y, theta, v_x, v_y]
+    Eigen::Matrix<double, 5, 5> P; // Covariance
+};
+
 class RobotModel {
    public:
-    RobotModel() = default;
+    RobotModel();
     ~RobotModel() = default;
 
     // Add methods to update the robot's state, compute kinematics, etc.
     void update(const robot_client::Sensors &sensors);
-    void setVelocity(double v_left, double v_right) {
-        v_left_ = v_left;
-        v_right_ = v_right;
-    }
-    Vec2 getPosition() const { return pos_; }
-    double getOrientation() const { return theta_; }
+    Vec2 getPosition() const;
+    double getOrientation() const;
     double getLifetimeSeconds() const;
 
    private:
-    void computePosition();
+    // void computePosition();
+    void ekfPredict(double dt, double gyro_z, double acc_x, double acc_y);
+    void ekfUpdateGPS(double gps_x, double gps_y);
 
     const double axle_length_ = 0.5;  // The distance between the center of each
                                       // of the robot's wheels (m)
@@ -50,6 +54,8 @@ class RobotModel {
         std::nullopt;  // Timestamp for GPS data
     std::optional<int64_t> last_gps_pos_time_ =
         std::nullopt;  // Timestamp for last GPS data
+    EKFState state_;
+    double gps_noise_ = 0.5; // meters, tune as needed
 };
 
 }  // namespace robot_model

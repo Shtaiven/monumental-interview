@@ -26,7 +26,7 @@ robot_client::Input controller(const robot_model::RobotModel &model,
     if (std::abs(theta_diff) > 0.05) {
         // Rotate towards target
         double angular_velocity = std::max(
-            0.0, std::min(2.0, std::abs(theta_diff) * 5.0));  // clamp [0, 2]
+            0.0, std::min(2.0, std::abs(theta_diff) * 1.0));  // clamp [0, 2]
         if (theta_diff < 0) {
             angular_velocity = -angular_velocity;  // Rotate left
         }
@@ -40,7 +40,7 @@ robot_client::Input controller(const robot_model::RobotModel &model,
     std::cout << "[DEBUG] Moving " << distance << " meters towards target"
               << std::endl;
     double linear_velocity =
-        std::max(0.0, std::min(2.0, distance * 10.0));  // clamp [0, 2]
+        std::max(0.0, std::min(2.0, distance * 1.0));  // clamp [0, 2]
     return robot_client::Input{.v_left = linear_velocity,
                                .v_right = linear_velocity};
 }
