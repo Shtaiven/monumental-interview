@@ -6,8 +6,8 @@
 #include <QWidget>
 #include <deque>
 
-#include "types.h"
 #include "robot_model.h"
+#include "types.h"
 
 class Visualizer : public QWidget {
     Q_OBJECT
@@ -39,8 +39,7 @@ class Visualizer : public QWidget {
     QPainter painter;
     double robot_x = 0;
     double robot_y = 0;
-    double heading_dx = 0;
-    double heading_dy = 0;
+    double robot_theta = 0;
     double setpoint_x = 0;
     double setpoint_y = 0;
     std::function<Vec2(double)> path_func = nullptr;

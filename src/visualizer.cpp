@@ -3,8 +3,7 @@
 #include <QPainterPath>
 #include <cmath>
 
-Visualizer::Visualizer(QWidget *parent)
-    : QWidget(parent), robot_x(0), robot_y(0), heading_dx(0), heading_dy(0) {
+Visualizer::Visualizer(QWidget *parent) : QWidget(parent) {
     setFixedSize(window_width, window_height);  // Set the window size
 }
 
@@ -12,30 +11,12 @@ void Visualizer::updateRobotModel(const robot_model::RobotModel &model) {
     auto pos = model.getPosition();
     robot_x = width() / 2.0 + pos.x * size_multiplier;
     robot_y = height() / 2.0 - pos.y * size_multiplier;
+    robot_theta = model.getOrientation();
 
-    // Store previous position and compute movement vector
-    static double last_x = pos.x;
-    static double last_y = pos.y;
-    static double last_dx = 1.0;  // Default to pointing right
-    static double last_dy = 0.0;
-
-    double dx = pos.x - last_x;
-    double dy = pos.y - last_y;
-
-    if (std::abs(dx) > 1e-6 || std::abs(dy) > 1e-6) {
-        last_dx = dx;
-        last_dy = dy;
-        // Only add to trail if position changed
-        trail.push_back(QPointF(robot_x, robot_y));
-        if (trail.size() > 10) {
-            trail.pop_front();
-        }
+    trail.push_back(QPointF(robot_x, robot_y));
+    if (trail.size() > 10) {
+        trail.pop_front();
     }
-    heading_dx = last_dx;
-    heading_dy = last_dy;
-
-    last_x = pos.x;
-    last_y = pos.y;
 
     update();
 }
@@ -85,33 +66,23 @@ void Visualizer::paintEvent(QPaintEvent *event) {
         0.25 * size_multiplier;  // distance from center to wheel
     double wheel_radius = 0.1 * size_multiplier;  // radius of wheels
 
-    // Draw heading indicator (yellow line in direction of movement)
+    // Draw heading indicator (yellow line in direction of orientation)
     double heading_length = 0.4 * size_multiplier;
-    double norm = std::sqrt(heading_dx * heading_dx + heading_dy * heading_dy);
-    double hx = robot_x, hy = robot_y;
-    double wx1 = robot_x, wy1 = robot_y, wx2 = robot_x, wy2 = robot_y;
-    if (norm > 1e-6) {
-        // Heading line
-        hx += (heading_dx / norm) * heading_length;
-        hy -= (heading_dy / norm) *
-              heading_length;  // minus because screen y is inverted
+    double hx = robot_x + std::cos(robot_theta) * heading_length;
+    double hy =
+        robot_y - std::sin(robot_theta) *
+                      heading_length;  // minus because screen y is inverted
 
-        // Perpendicular vector for wheels
-        double perp_dx = -heading_dy / norm;
-        double perp_dy = heading_dx / norm;
+    // Perpendicular vector for wheels (90 degrees from heading)
+    double perp_dx = -std::sin(robot_theta);
+    double perp_dy = std::cos(robot_theta);
 
-        // Wheel positions
-        wx1 += perp_dx * wheel_offset;
-        wy1 -= perp_dy * wheel_offset;  // minus because screen y is inverted
-        wx2 -= perp_dx * wheel_offset;
-        wy2 += perp_dy * wheel_offset;
-    } else {
-        // Default wheel positions if no heading
-        wx1 = robot_x;
-        wy1 = robot_y - wheel_offset;
-        wx2 = robot_x;
-        wy2 = robot_y + wheel_offset;
-    }
+    // Wheel positions
+    double wx1 = robot_x + perp_dx * wheel_offset;
+    double wy1 =
+        robot_y - perp_dy * wheel_offset;  // minus because screen y is inverted
+    double wx2 = robot_x - perp_dx * wheel_offset;
+    double wy2 = robot_y + perp_dy * wheel_offset;
 
     // Draw wheels
     painter.setBrush(Qt::gray);

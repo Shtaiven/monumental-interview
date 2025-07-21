@@ -57,8 +57,7 @@ void message_cb(robot_client::RobotClient *c,
     std::cout << "[INFO] Sent input data: " << input.v_left << " "
               << input.v_right << std::endl;
 
-    // TODO: pass robot model to visualizer instead
-    // Update the visualizer with the new position and orientation
+    // Update the visualizer with the new state
     if (visualizer) {
         visualizer->setSetpoint(setpoint.x, setpoint.y);
         visualizer->updateRobotModel(robot_model);
