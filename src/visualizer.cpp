@@ -8,18 +8,19 @@ Visualizer::Visualizer(QWidget *parent)
     setFixedSize(window_width, window_height);  // Set the window size
 }
 
-void Visualizer::updatePosition(double x, double y) {
-    robot_x = width() / 2.0 + x * size_multiplier;
-    robot_y = height() / 2.0 - y * size_multiplier;
+void Visualizer::updateRobotModel(const robot_model::RobotModel &model) {
+    auto pos = model.getPosition();
+    robot_x = width() / 2.0 + pos.x * size_multiplier;
+    robot_y = height() / 2.0 - pos.y * size_multiplier;
 
     // Store previous position and compute movement vector
-    static double last_x = x;
-    static double last_y = y;
+    static double last_x = pos.x;
+    static double last_y = pos.y;
     static double last_dx = 1.0;  // Default to pointing right
     static double last_dy = 0.0;
 
-    double dx = x - last_x;
-    double dy = y - last_y;
+    double dx = pos.x - last_x;
+    double dy = pos.y - last_y;
 
     if (std::abs(dx) > 1e-6 || std::abs(dy) > 1e-6) {
         last_dx = dx;
@@ -33,8 +34,8 @@ void Visualizer::updatePosition(double x, double y) {
     heading_dx = last_dx;
     heading_dy = last_dy;
 
-    last_x = x;
-    last_y = y;
+    last_x = pos.x;
+    last_y = pos.y;
 
     update();
 }
@@ -136,6 +137,8 @@ void Visualizer::paintEvent(QPaintEvent *event) {
     double x_size = 0.2 * size_multiplier;
 
     painter.setPen(QPen(Qt::cyan, 2));
-    painter.drawLine(QPointF(sx - x_size, sy - x_size), QPointF(sx + x_size, sy + x_size));
-    painter.drawLine(QPointF(sx - x_size, sy + x_size), QPointF(sx + x_size, sy - x_size));
+    painter.drawLine(QPointF(sx - x_size, sy - x_size),
+                     QPointF(sx + x_size, sy + x_size));
+    painter.drawLine(QPointF(sx - x_size, sy + x_size),
+                     QPointF(sx + x_size, sy - x_size));
 }

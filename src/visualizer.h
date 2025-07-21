@@ -7,13 +7,14 @@
 #include <deque>
 
 #include "types.h"
+#include "robot_model.h"
 
 class Visualizer : public QWidget {
     Q_OBJECT
 
    public:
     explicit Visualizer(QWidget *parent = nullptr);
-    void updatePosition(double x, double y);
+    void updateRobotModel(const robot_model::RobotModel &model);
     void setPathFunction(std::function<Vec2(double)> func, double start,
                          double stop, double step) {
         path_func = func;

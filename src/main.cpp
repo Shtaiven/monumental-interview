@@ -17,6 +17,7 @@ void message_cb(robot_client::RobotClient *c,
                 const robot_client::Sensors sensors) {
     static robot_model::RobotModel robot_model;
     static double time_elapsed_s = 0.0;
+    static double path_eval_time = 0.0;
 
     // Update the robot model with new sensor data
     robot_model.update(sensors);
@@ -30,12 +31,22 @@ void message_cb(robot_client::RobotClient *c,
     std::cout << "  position: " << pos.x << " " << pos.y << std::endl;
     std::cout << "  theta: " << theta << "rad" << std::endl;
 
-    auto setpoint = path_generator::eval(lifetime);
+    auto setpoint = path_generator::eval(path_eval_time);
     std::cout << "[INFO] Setpoint: " << setpoint.x << " " << setpoint.y
               << std::endl;
 
     // Compute the next robot input
-    auto input = controller(robot_model, path_generator::eval(lifetime));
+    auto input = controller(robot_model, setpoint);
+
+    auto current_pos = robot_model.getPosition();
+    Vec2 distance_vec{setpoint.x - current_pos.x, setpoint.y - current_pos.y};
+    double distance = std::sqrt(distance_vec.x * distance_vec.x +
+                                distance_vec.y * distance_vec.y);
+    std::cout << "[INFO] Distance to target: " << distance << std::endl;
+    // If the setpoint is reached, then set the next setpoint
+    if (distance <= 0.1 && path_eval_time <= 20) {
+        path_eval_time += 0.25;
+    }
 
     // Update the velocities in the model
     robot_model.setVelocity(input.v_left, input.v_right);
@@ -49,9 +60,8 @@ void message_cb(robot_client::RobotClient *c,
     // TODO: pass robot model to visualizer instead
     // Update the visualizer with the new position and orientation
     if (visualizer) {
-        auto pos = robot_model.getPosition();
         visualizer->setSetpoint(setpoint.x, setpoint.y);
-        visualizer->updatePosition(pos.x, pos.y);
+        visualizer->updateRobotModel(robot_model);
     }
 }
 
