@@ -55,7 +55,7 @@ class RobotModel {
     std::optional<int64_t> last_gps_pos_time_ =
         std::nullopt;  // Timestamp for last GPS data
     EKFState state_;
-    double gps_noise_ = 0.5;  // meters, tune as needed
+    double gps_noise_ = 0.12;  // meters
 };
 
 }  // namespace robot_model

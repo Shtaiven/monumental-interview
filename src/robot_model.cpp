@@ -88,12 +88,13 @@ void RobotModel::update(const robot_client::Sensors &sensors) {
                                gps_pos_time_.value_or(0.0));
     }
 
-    // Prediction step
-    double dt = 0.05;  // Default to 50Hz
+    double dt = 0.05;  // Default to 20Hz
     if (last_linear_acc_time_.has_value() && linear_acc_time_.has_value()) {
         dt = (*linear_acc_time_ - *last_linear_acc_time_) / 1000.0;
         if (dt <= 0.0) dt = 0.05;
     }
+
+    // Prediction step
     if (linear_acc_time_.has_value()) {
         ekfPredict(dt, angular_vel_, linear_acc_.x, linear_acc_.y);
     }
@@ -137,15 +138,20 @@ void RobotModel::ekfPredict(double dt, double gyro_z, double acc_x,
 
     // Process noise covariance Q (tune as needed)
     Eigen::Matrix<double, 5, 5> Q = Eigen::Matrix<double, 5, 5>::Zero();
-    Q(0, 0) = 0.2;   // x position noise (m^2)
-    Q(1, 1) = 0.2;   // y position noise (m^2)
-    Q(2, 2) = 0.05;  // theta noise (rad^2)
-    Q(3, 3) = 0.05;  // v_x noise (m^2/s^2)
-    Q(4, 4) = 0.05;  // v_y noise (m^2/s^2)
+    Q(0, 0) = 1.0;  // x position noise (m^2)
+    Q(1, 1) = 1.0;  // y position noise (m^2)
+    Q(2, 2) = 0.5;  // theta noise (rad^2)
+    Q(3, 3) = 3.0;  // v_x noise (m^2/s^2)
+    Q(4, 4) = 3.0;  // v_y noise (m^2/s^2)
 
     // Covariance prediction
     state_.x = x_pred;
     state_.P = F * state_.P * F.transpose() + Q;
+
+    // Clamp the max velocity
+    double max_v = 2.0;  // meters/second, adjust as needed
+    state_.x(3) = std::max(-max_v, std::min(max_v, state_.x(3)));
+    state_.x(4) = std::max(-max_v, std::min(max_v, state_.x(4)));
 }
 
 void RobotModel::ekfUpdateGPS(double gps_x, double gps_y) {
@@ -169,69 +175,5 @@ void RobotModel::ekfUpdateGPS(double gps_x, double gps_y) {
     state_.x += K * (z - z_pred);
     state_.P = (Eigen::Matrix<double, 5, 5>::Identity() - K * H) * state_.P;
 }
-
-// void RobotModel::computePosition() {
-//     // Only update gps position data if we have new data
-//     // TODO: GPS data is crap, use an Extended Kalman Filter
-//     bool gps_data_updated =
-//         gps_pos_time_.has_value() && last_gps_pos_time_ != gps_pos_time_;
-//     if (gps_data_updated) {
-//         pos_ = gps_pos_;
-//     }
-
-//     // Early exit if we don't have a new sensor value
-//     if (!angular_vel_time_.has_value() || !last_angular_vel_time_.has_value()
-//     ||
-//         (last_angular_vel_time_ == angular_vel_time_)) {
-//         std::cout << "[WARN] No new gyro sensor values" << std::endl;
-//         return;
-//     }
-
-//     // Forward kinematics computations explained by the paper below:
-//     // https://www.cs.columbia.edu/~allen/F17/NOTES/icckinematics.pdf
-
-//     // Get change in time since last measurement
-//     double dt = 0.0;
-//     if (last_angular_vel_time_.has_value()) {
-//         dt = (*angular_vel_time_ - *last_angular_vel_time_) /
-//              1000.0;  // Convert ms to seconds
-//     }
-
-//     if (v_left_ == v_right_) {
-//         // Case 1: Moving forward
-//         pos_.x += v_left_ * std::cos(theta_) * dt;
-//         pos_.y += v_left_ * std::sin(theta_) * dt;
-//         // theta_ remains the same
-
-//     } else if (v_left_ == -v_right_) {
-//         // Case 2: Rotating in place
-//         theta_ += 2 * v_right_ * dt / axle_length_;
-//         // pos_ remains the same
-//     } else {
-//         // Case 3: Velocities are completely different
-//         // Compute the distance to the instantaneous center of curvature
-//         double icc_distance =
-//             (axle_length_ / 2.0) * (v_left_ + v_right_) / (v_right_ -
-//             v_left_);
-
-//         // Compute the instantaneous center of curvature
-//         Vec2 icc{pos_.x - icc_distance * std::sin(theta_),
-//                  pos_.y + icc_distance * std::cos(theta_)};
-
-//         double theta_diff = angular_vel_ * dt;
-
-//         std::cout << "[DEBUG] dt: " << dt << "s" << std::endl;
-//         std::cout << "[DEBUG] theta_diff: " << theta_diff << "rad" <<
-//         std::endl; std::cout << "[DEBUG] icc: " << icc.x << " " << icc.y <<
-//         std::endl;
-
-//         // Update the position
-//         pos_.x = std::cos(theta_diff) * (pos_.x - icc.x) -
-//                  std::sin(theta_diff) * (pos_.y - icc.y) + icc.x;
-//         pos_.y = std::sin(theta_diff) * (pos_.x - icc.x) +
-//                  std::cos(theta_diff) * (pos_.y - icc.y) + icc.y;
-//         theta_ += theta_diff;
-//     }
-// }
 
 }  // namespace robot_model

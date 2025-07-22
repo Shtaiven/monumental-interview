@@ -16,8 +16,8 @@ Visualizer *visualizer = nullptr;
 void message_cb(robot_client::RobotClient *c,
                 const robot_client::Sensors sensors) {
     static robot_model::RobotModel robot_model;
-    static double time_elapsed_s = 0.0;
     static double path_eval_time = 0.0;
+    static robot_client::Input last_input{0, 0};
 
     // Update the robot model with new sensor data
     robot_model.update(sensors);
@@ -32,13 +32,15 @@ void message_cb(robot_client::RobotClient *c,
     std::cout << "  theta: " << theta << "rad" << std::endl;
 
     // Get the point in the path to target
-    auto setpoint = path_generator::eval(path_eval_time);
+    // auto setpoint = path_generator::eval(path_eval_time);
+    auto setpoint = path_generator::eval(lifetime);
+    // auto setpoint = path_generator::eval(5);
     std::cout << "[INFO] Setpoint: " << setpoint.x << " " << setpoint.y
               << std::endl;
 
     // Compute the next robot input
     auto input = controller(robot_model, setpoint);
-    // robot_client::Input input{0.5,0.5};
+    // robot_client::Input input{0.0, 0.0};
 
     auto current_pos = robot_model.getPosition();
     Vec2 distance_vec{setpoint.x - current_pos.x, setpoint.y - current_pos.y};
@@ -51,10 +53,14 @@ void message_cb(robot_client::RobotClient *c,
     }
 
     // Send the next input data to the robot
-    c->sendInputMessage(input);
+    if (input.v_left != last_input.v_left ||
+        input.v_right != last_input.v_right) {
+        c->sendInputMessage(input);
+        last_input = input;
 
-    std::cout << "[INFO] Sent input data: " << input.v_left << " "
-              << input.v_right << std::endl;
+        std::cout << "[INFO] Sent input data: " << input.v_left << " "
+                  << input.v_right << std::endl;
+    }
 
     // Update the visualizer with the new state
     if (visualizer) {
