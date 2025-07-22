@@ -42,16 +42,12 @@ static std::optional<int64_t> stringToTimestampMillis(
 RobotModel::RobotModel() {
     state_.x.setZero();
     state_.P.setIdentity();
-    state_.P *= 10.0; // Initial uncertainty
+    state_.P *= 10.0;  // Initial uncertainty
 }
 
-Vec2 RobotModel::getPosition() const {
-    return Vec2{state_.x(0), state_.x(1)};
-}
+Vec2 RobotModel::getPosition() const { return Vec2{state_.x(0), state_.x(1)}; }
 
-double RobotModel::getOrientation() const {
-    return state_.x(2);
-}
+double RobotModel::getOrientation() const { return state_.x(2); }
 
 double RobotModel::getLifetimeSeconds() const {
     if (!angular_vel_time_.has_value() || !gps_pos_time_.has_value() ||
@@ -70,7 +66,7 @@ void RobotModel::update(const robot_client::Sensors &sensors) {
     for (const auto &sensor : sensors.sensors) {
         if (sensor.name == "accelerometer" && sensor.data.size() >= 2) {
             linear_acc_.x = sensor.data[0];
-            linear_acc_.y = sensor.data[0];
+            linear_acc_.y = sensor.data[1];
             last_linear_acc_time_ = linear_acc_time_;
             linear_acc_time_ = stringToTimestampMillis(sensor.timestamp);
         } else if (sensor.name == "gyro" && sensor.data.size() >= 1) {
@@ -93,7 +89,7 @@ void RobotModel::update(const robot_client::Sensors &sensors) {
     }
 
     // Prediction step
-    double dt = 0.05; // Default to 50Hz
+    double dt = 0.05;  // Default to 50Hz
     if (last_linear_acc_time_.has_value() && linear_acc_time_.has_value()) {
         dt = (*linear_acc_time_ - *last_linear_acc_time_) / 1000.0;
         if (dt <= 0.0) dt = 0.05;
@@ -103,14 +99,17 @@ void RobotModel::update(const robot_client::Sensors &sensors) {
     }
 
     // Correction step (GPS)
-    if (gps_pos_time_.has_value() && (!last_gps_pos_time_ || gps_pos_time_ != last_gps_pos_time_)) {
+    if (gps_pos_time_.has_value() &&
+        (!last_gps_pos_time_ || gps_pos_time_ != last_gps_pos_time_)) {
         ekfUpdateGPS(gps_pos_.x, gps_pos_.y);
     }
 }
 
-void RobotModel::ekfPredict(double dt, double gyro_z, double acc_x, double acc_y) {
+void RobotModel::ekfPredict(double dt, double gyro_z, double acc_x,
+                            double acc_y) {
     // State: [x, y, theta, v_x, v_y]
-    double x = state_.x(0), y = state_.x(1), theta = state_.x(2), v_x = state_.x(3), v_y = state_.x(4);
+    double x = state_.x(0), y = state_.x(1), theta = state_.x(2),
+           v_x = state_.x(3), v_y = state_.x(4);
 
     // Rotate acceleration to global frame
     double ax_global = std::cos(theta) * acc_x - std::sin(theta) * acc_y;
@@ -126,19 +125,23 @@ void RobotModel::ekfPredict(double dt, double gyro_z, double acc_x, double acc_y
 
     // Jacobian F (linearized motion model)
     Eigen::Matrix<double, 5, 5> F = Eigen::Matrix<double, 5, 5>::Identity();
-    F(0,2) = -v_x * dt * std::sin(theta) - 0.5 * acc_x * dt * dt * std::sin(theta) - v_y * dt * std::cos(theta) - 0.5 * acc_y * dt * dt * std::cos(theta);
-    F(1,2) = v_x * dt * std::cos(theta) + 0.5 * acc_x * dt * dt * std::cos(theta) - v_y * dt * std::sin(theta) - 0.5 * acc_y * dt * dt * std::sin(theta);
-    F(2,2) = 1;
-    F(3,2) = -acc_x * dt * std::sin(theta) - acc_y * dt * std::cos(theta);
-    F(4,2) = acc_x * dt * std::cos(theta) - acc_y * dt * std::sin(theta);
+    F(0, 2) =
+        -v_x * dt * std::sin(theta) - 0.5 * acc_x * dt * dt * std::sin(theta) -
+        v_y * dt * std::cos(theta) - 0.5 * acc_y * dt * dt * std::cos(theta);
+    F(1, 2) =
+        v_x * dt * std::cos(theta) + 0.5 * acc_x * dt * dt * std::cos(theta) -
+        v_y * dt * std::sin(theta) - 0.5 * acc_y * dt * dt * std::sin(theta);
+    F(2, 2) = 1;
+    F(3, 2) = -acc_x * dt * std::sin(theta) - acc_y * dt * std::cos(theta);
+    F(4, 2) = acc_x * dt * std::cos(theta) - acc_y * dt * std::sin(theta);
 
     // Process noise covariance Q (tune as needed)
     Eigen::Matrix<double, 5, 5> Q = Eigen::Matrix<double, 5, 5>::Zero();
-    Q(0,0) = 0.01 * dt;   // x position noise (meters^2)
-    Q(1,1) = 0.01 * dt;   // y position noise (meters^2)
-    Q(2,2) = 0.01 * dt;  // theta noise (radians^2)
-    Q(3,3) = 0.1 * std::abs(acc_x) * dt;    // v_x noise (m^2/s^2)
-    Q(4,4) = 0.1 * std::abs(acc_y) * dt;    // v_y noise (m^2/s^2)
+    Q(0, 0) = 0.2;   // x position noise (m^2)
+    Q(1, 1) = 0.2;   // y position noise (m^2)
+    Q(2, 2) = 0.05;  // theta noise (rad^2)
+    Q(3, 3) = 0.05;  // v_x noise (m^2/s^2)
+    Q(4, 4) = 0.05;  // v_y noise (m^2/s^2)
 
     // Covariance prediction
     state_.x = x_pred;
@@ -152,13 +155,15 @@ void RobotModel::ekfUpdateGPS(double gps_x, double gps_y) {
 
     // Measurement Jacobian H
     Eigen::Matrix<double, 2, 5> H = Eigen::Matrix<double, 2, 5>::Zero();
-    H(0,0) = 1; H(1,1) = 1;
+    H(0, 0) = 1;
+    H(1, 1) = 1;
 
     // Measurement noise covariance R
     Eigen::Matrix2d R = Eigen::Matrix2d::Identity() * gps_noise_;
 
     // Kalman gain
-    Eigen::Matrix<double, 5, 2> K = state_.P * H.transpose() * (H * state_.P * H.transpose() + R).inverse();
+    Eigen::Matrix<double, 5, 2> K =
+        state_.P * H.transpose() * (H * state_.P * H.transpose() + R).inverse();
 
     // Update state and covariance
     state_.x += K * (z - z_pred);
@@ -175,7 +180,8 @@ void RobotModel::ekfUpdateGPS(double gps_x, double gps_y) {
 //     }
 
 //     // Early exit if we don't have a new sensor value
-//     if (!angular_vel_time_.has_value() || !last_angular_vel_time_.has_value() ||
+//     if (!angular_vel_time_.has_value() || !last_angular_vel_time_.has_value()
+//     ||
 //         (last_angular_vel_time_ == angular_vel_time_)) {
 //         std::cout << "[WARN] No new gyro sensor values" << std::endl;
 //         return;
@@ -205,7 +211,8 @@ void RobotModel::ekfUpdateGPS(double gps_x, double gps_y) {
 //         // Case 3: Velocities are completely different
 //         // Compute the distance to the instantaneous center of curvature
 //         double icc_distance =
-//             (axle_length_ / 2.0) * (v_left_ + v_right_) / (v_right_ - v_left_);
+//             (axle_length_ / 2.0) * (v_left_ + v_right_) / (v_right_ -
+//             v_left_);
 
 //         // Compute the instantaneous center of curvature
 //         Vec2 icc{pos_.x - icc_distance * std::sin(theta_),
@@ -214,8 +221,9 @@ void RobotModel::ekfUpdateGPS(double gps_x, double gps_y) {
 //         double theta_diff = angular_vel_ * dt;
 
 //         std::cout << "[DEBUG] dt: " << dt << "s" << std::endl;
-//         std::cout << "[DEBUG] theta_diff: " << theta_diff << "rad" << std::endl;
-//         std::cout << "[DEBUG] icc: " << icc.x << " " << icc.y << std::endl;
+//         std::cout << "[DEBUG] theta_diff: " << theta_diff << "rad" <<
+//         std::endl; std::cout << "[DEBUG] icc: " << icc.x << " " << icc.y <<
+//         std::endl;
 
 //         // Update the position
 //         pos_.x = std::cos(theta_diff) * (pos_.x - icc.x) -

@@ -1,8 +1,8 @@
 #pragma once
 
+#include <Eigen/Dense>
 #include <cmath>
 #include <optional>
-#include <Eigen/Dense>
 
 #include "robot_client.h"
 #include "types.h"
@@ -10,8 +10,8 @@
 namespace robot_model {
 
 struct EKFState {
-    Eigen::Matrix<double, 5, 1> x; // [x, y, theta, v_x, v_y]
-    Eigen::Matrix<double, 5, 5> P; // Covariance
+    Eigen::Matrix<double, 5, 1> x;  // [x, y, theta, v_x, v_y]
+    Eigen::Matrix<double, 5, 5> P;  // Covariance
 };
 
 class RobotModel {
@@ -55,7 +55,7 @@ class RobotModel {
     std::optional<int64_t> last_gps_pos_time_ =
         std::nullopt;  // Timestamp for last GPS data
     EKFState state_;
-    double gps_noise_ = 0.5; // meters, tune as needed
+    double gps_noise_ = 0.5;  // meters, tune as needed
 };
 
 }  // namespace robot_model
