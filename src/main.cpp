@@ -6,6 +6,7 @@
 #include "path_generator.h"
 #include "robot_client.h"
 #include "robot_model.h"
+#include "particle_filter.h"
 #include "visualizer.h"
 
 using json = nlohmann::json;
@@ -23,8 +24,10 @@ void message_cb(robot_client::RobotClient *c,
     robot_model.update(sensors);
 
     auto lifetime = robot_model.getLifetimeSeconds();
-    auto pos = robot_model.getPosition();
-    auto theta = robot_model.getOrientation();
+    // auto pos = robot_model.getPosition();
+    // auto theta = robot_model.getOrientation();
+    auto pos = robot_model.getPfPosition();
+    auto theta = robot_model.getPfOrientation();
 
     std::cout << "[INFO] Current state:" << std::endl;
     std::cout << "  lifetime: " << lifetime << "s" << std::endl;
@@ -33,16 +36,16 @@ void message_cb(robot_client::RobotClient *c,
 
     // Get the point in the path to target
     // auto setpoint = path_generator::eval(path_eval_time);
-    auto setpoint = path_generator::eval(lifetime);
-    // auto setpoint = path_generator::eval(5);
+    // auto setpoint = path_generator::eval(lifetime);
+    auto setpoint = path_generator::eval(5);
     std::cout << "[INFO] Setpoint: " << setpoint.x << " " << setpoint.y
               << std::endl;
 
     // Compute the next robot input
     auto input = controller(robot_model, setpoint);
-    // robot_client::Input input{0.0, 0.0};
+    // robot_client::Input input{0.5, 0.5};
 
-    auto current_pos = robot_model.getPosition();
+    auto current_pos = robot_model.getPfPosition();
     Vec2 distance_vec{setpoint.x - current_pos.x, setpoint.y - current_pos.y};
     double distance = std::sqrt(distance_vec.x * distance_vec.x +
                                 distance_vec.y * distance_vec.y);

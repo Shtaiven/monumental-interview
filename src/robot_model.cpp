@@ -5,6 +5,8 @@
 #include <regex>
 #include <string>
 
+#include "particle_filter.h"
+
 namespace robot_model {
 
 static std::optional<int64_t> stringToTimestampMillis(
@@ -43,6 +45,10 @@ RobotModel::RobotModel() {
     state_.x.setZero();
     state_.P.setIdentity();
     state_.P *= 10.0;  // Initial uncertainty
+
+    // Particle filter update
+    double std_pos[3] = {0.2, 0.2, 0.05}; // initial uncertainty
+    pf_.init(gps_pos_.x, gps_pos_.y, state_.x(2), std_pos);
 }
 
 Vec2 RobotModel::getPosition() const { return Vec2{state_.x(0), state_.x(1)}; }
@@ -104,6 +110,12 @@ void RobotModel::update(const robot_client::Sensors &sensors) {
         (!last_gps_pos_time_ || gps_pos_time_ != last_gps_pos_time_)) {
         ekfUpdateGPS(gps_pos_.x, gps_pos_.y);
     }
+
+    double std_motion[3] = {0.1, 0.1, 0.1}; // IMU noise
+    pf_.predict(dt, angular_vel_, linear_acc_.x, linear_acc_.y, std_motion);
+
+    double std_gps[2] = {0.05, 0.05}; // GPS noise
+    pf_.updateGPS(gps_pos_.x, gps_pos_.y, std_gps);
 }
 
 void RobotModel::ekfPredict(double dt, double gyro_z, double acc_x,

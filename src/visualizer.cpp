@@ -8,13 +8,14 @@ Visualizer::Visualizer(QWidget *parent) : QWidget(parent) {
 }
 
 void Visualizer::updateRobotModel(const robot_model::RobotModel &model) {
-    auto pos = model.getPosition();
+    auto pos = model.getPfPosition();
     robot_x = width() / 2.0 + pos.x * size_multiplier;
     robot_y = height() / 2.0 - pos.y * size_multiplier;
-    robot_theta = model.getOrientation();
+    robot_theta = model.getPfOrientation();
+    particles = model.getPfParticles();
 
     trail.push_back(QPointF(robot_x, robot_y));
-    if (trail.size() > 10) {
+    if (trail.size() > 1000) {
         trail.pop_front();
     }
 
@@ -112,4 +113,14 @@ void Visualizer::paintEvent(QPaintEvent *event) {
                      QPointF(sx + x_size, sy + x_size));
     painter.drawLine(QPointF(sx - x_size, sy + x_size),
                      QPointF(sx + x_size, sy - x_size));
+
+    // Draw particle filter dots
+    painter.setBrush(QColor(128, 128, 128, 80));
+    painter.setPen(Qt::NoPen);
+    double particle_radius = 0.07 * size_multiplier;
+    for (const auto& p : particles) {
+        double px = width() / 2.0 + p.x * size_multiplier;
+        double py = height() / 2.0 - p.y * size_multiplier;
+        painter.drawEllipse(QPointF(px, py), particle_radius, particle_radius);
+    }
 }

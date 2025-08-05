@@ -3,8 +3,8 @@
 #include <cmath>
 
 // PD gains
-#define K_P_THETA 0.5
-#define K_D_THETA 0.2
+#define K_P_THETA 0.1
+#define K_D_THETA 0.01
 #define K_P_POSITION 1.0
 #define K_D_POSITION 0.2
 
@@ -14,7 +14,7 @@ robot_client::Input controller(const robot_model::RobotModel &model,
     static double last_distance = 0.0;
     static double last_time = 0.0;
 
-    auto current_pos = model.getPosition();
+    auto current_pos = model.getPfPosition();
     Vec2 distance_vec{setpoint.x - current_pos.x, setpoint.y - current_pos.y};
     double distance = std::sqrt(distance_vec.x * distance_vec.x +
                                 distance_vec.y * distance_vec.y);
@@ -30,7 +30,7 @@ robot_client::Input controller(const robot_model::RobotModel &model,
         return {0, 0};
     }
 
-    double current_theta = model.getOrientation();
+    double current_theta = model.getPfOrientation();
     double target_theta = std::atan2(distance_vec.y, distance_vec.x + 1e-6);
     double theta_diff = target_theta - current_theta;
 
@@ -45,7 +45,7 @@ robot_client::Input controller(const robot_model::RobotModel &model,
     double linear_velocity = K_P_POSITION * distance + K_D_POSITION * d_distance;
     double angular_velocity = K_P_THETA * theta_diff + K_D_THETA * d_theta;
 
-    // // Clamp velocities
+    // Clamp velocities
     // linear_velocity = std::max(0.0, std::min(2.0, linear_velocity));
     // angular_velocity = std::max(-2.0, std::min(2.0, angular_velocity));
 

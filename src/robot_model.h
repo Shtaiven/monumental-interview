@@ -6,6 +6,7 @@
 
 #include "robot_client.h"
 #include "types.h"
+#include "particle_filter.h"
 
 namespace robot_model {
 
@@ -22,11 +23,13 @@ class RobotModel {
     // Add methods to update the robot's state, compute kinematics, etc.
     void update(const robot_client::Sensors &sensors);
     Vec2 getPosition() const;
+    Vec2 getPfPosition() const {return pf_.getPosition();};
+    std::vector<Particle> getPfParticles() const {return pf_.getParticles();};
     double getOrientation() const;
+    double getPfOrientation() const {return pf_.getOrientation();};
     double getLifetimeSeconds() const;
 
    private:
-    // void computePosition();
     void ekfPredict(double dt, double gyro_z, double acc_x, double acc_y);
     void ekfUpdateGPS(double gps_x, double gps_y);
 
@@ -56,6 +59,8 @@ class RobotModel {
         std::nullopt;  // Timestamp for last GPS data
     EKFState state_;
     double gps_noise_ = 0.12;  // meters
+
+    ParticleFilter pf_{500};
 };
 
 }  // namespace robot_model

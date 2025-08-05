@@ -42,6 +42,7 @@ class Visualizer : public QWidget {
     double robot_theta = 0;
     double setpoint_x = 0;
     double setpoint_y = 0;
+    std::vector<Particle> particles;
     std::function<Vec2(double)> path_func = nullptr;
     double path_start;
     double path_stop;
