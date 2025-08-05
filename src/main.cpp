@@ -3,10 +3,10 @@
 #include <iostream>
 
 #include "controller.h"
+#include "particle_filter.h"
 #include "path_generator.h"
 #include "robot_client.h"
 #include "robot_model.h"
-#include "particle_filter.h"
 #include "visualizer.h"
 
 using json = nlohmann::json;
@@ -24,10 +24,8 @@ void message_cb(robot_client::RobotClient *c,
     robot_model.update(sensors);
 
     auto lifetime = robot_model.getLifetimeSeconds();
-    // auto pos = robot_model.getPosition();
-    // auto theta = robot_model.getOrientation();
-    auto pos = robot_model.getPfPosition();
-    auto theta = robot_model.getPfOrientation();
+    auto pos = robot_model.getPosition();
+    auto theta = robot_model.getOrientation();
 
     std::cout << "[INFO] Current state:" << std::endl;
     std::cout << "  lifetime: " << lifetime << "s" << std::endl;
@@ -42,10 +40,10 @@ void message_cb(robot_client::RobotClient *c,
               << std::endl;
 
     // Compute the next robot input
-    auto input = controller(robot_model, setpoint);
-    // robot_client::Input input{0.5, 0.5};
+    // auto input = controller(robot_model, setpoint);
+    robot_client::Input input{0.5, 0.5};
 
-    auto current_pos = robot_model.getPfPosition();
+    auto current_pos = robot_model.getPosition();
     Vec2 distance_vec{setpoint.x - current_pos.x, setpoint.y - current_pos.y};
     double distance = std::sqrt(distance_vec.x * distance_vec.x +
                                 distance_vec.y * distance_vec.y);

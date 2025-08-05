@@ -14,7 +14,7 @@ robot_client::Input controller(const robot_model::RobotModel &model,
     static double last_distance = 0.0;
     static double last_time = 0.0;
 
-    auto current_pos = model.getPfPosition();
+    auto current_pos = model.getPosition();
     Vec2 distance_vec{setpoint.x - current_pos.x, setpoint.y - current_pos.y};
     double distance = std::sqrt(distance_vec.x * distance_vec.x +
                                 distance_vec.y * distance_vec.y);
@@ -30,7 +30,7 @@ robot_client::Input controller(const robot_model::RobotModel &model,
         return {0, 0};
     }
 
-    double current_theta = model.getPfOrientation();
+    double current_theta = model.getOrientation();
     double target_theta = std::atan2(distance_vec.y, distance_vec.x + 1e-6);
     double theta_diff = target_theta - current_theta;
 
@@ -42,7 +42,8 @@ robot_client::Input controller(const robot_model::RobotModel &model,
     double d_distance = (dt > 0.0) ? (distance - last_distance) / dt : 0.0;
 
     // PD control for both
-    double linear_velocity = K_P_POSITION * distance + K_D_POSITION * d_distance;
+    double linear_velocity =
+        K_P_POSITION * distance + K_D_POSITION * d_distance;
     double angular_velocity = K_P_THETA * theta_diff + K_D_THETA * d_theta;
 
     // Clamp velocities

@@ -4,16 +4,11 @@
 #include <cmath>
 #include <optional>
 
+#include "particle_filter.h"
 #include "robot_client.h"
 #include "types.h"
-#include "particle_filter.h"
 
 namespace robot_model {
-
-struct EKFState {
-    Eigen::Matrix<double, 5, 1> x;  // [x, y, theta, v_x, v_y]
-    Eigen::Matrix<double, 5, 5> P;  // Covariance
-};
 
 class RobotModel {
    public:
@@ -22,17 +17,12 @@ class RobotModel {
 
     // Add methods to update the robot's state, compute kinematics, etc.
     void update(const robot_client::Sensors &sensors);
-    Vec2 getPosition() const;
-    Vec2 getPfPosition() const {return pf_.getPosition();};
-    std::vector<Particle> getPfParticles() const {return pf_.getParticles();};
-    double getOrientation() const;
-    double getPfOrientation() const {return pf_.getOrientation();};
+    Vec2 getPosition() const { return pf_.getPosition(); };
+    std::vector<Particle> getParticles() const { return pf_.getParticles(); };
+    double getOrientation() const { return pf_.getOrientation(); };
     double getLifetimeSeconds() const;
 
    private:
-    void ekfPredict(double dt, double gyro_z, double acc_x, double acc_y);
-    void ekfUpdateGPS(double gps_x, double gps_y);
-
     const double axle_length_ = 0.5;  // The distance between the center of each
                                       // of the robot's wheels (m)
 
@@ -56,8 +46,7 @@ class RobotModel {
     std::optional<int64_t> gps_pos_time_ =
         std::nullopt;  // Timestamp for GPS data
     std::optional<int64_t> last_gps_pos_time_ =
-        std::nullopt;  // Timestamp for last GPS data
-    EKFState state_;
+        std::nullopt;          // Timestamp for last GPS data
     double gps_noise_ = 0.12;  // meters
 
     ParticleFilter pf_{500};
