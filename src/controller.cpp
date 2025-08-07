@@ -3,9 +3,9 @@
 #include <cmath>
 
 // PD gains
-#define K_P_THETA 1.0
-#define K_D_THETA 0.3
-#define K_P_POSITION 0.5
+#define K_P_THETA 1.1
+#define K_D_THETA 0.2
+#define K_P_POSITION 0.45
 #define K_D_POSITION 0.2
 
 robot_client::Input controller(const robot_model::RobotModel &model,
@@ -46,16 +46,12 @@ robot_client::Input controller(const robot_model::RobotModel &model,
         K_P_POSITION * distance + K_D_POSITION * d_distance;
     double angular_velocity = K_P_THETA * theta_diff + K_D_THETA * d_theta;
 
-    // Clamp velocities
-    // linear_velocity = std::max(0.0, std::min(2.0, linear_velocity));
-    // angular_velocity = std::max(-2.0, std::min(2.0, angular_velocity));
-
     // Differential drive mixing
     double v_left = linear_velocity - angular_velocity;
     double v_right = linear_velocity + angular_velocity;
 
     // Clamp wheel velocities
-    double max_wheel_speed = 1.5;  // m/s
+    double max_wheel_speed = 2.0;  // m/s
     v_left = std::max(-max_wheel_speed, std::min(max_wheel_speed, v_left));
     v_right = std::max(-max_wheel_speed, std::min(max_wheel_speed, v_right));
 
