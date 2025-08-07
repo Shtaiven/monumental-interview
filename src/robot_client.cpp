@@ -61,23 +61,19 @@ void RobotClient::onMessage(
                   << std::endl;
         return;
     }
+    // else {
+    //     std::cout << "[DEBUG] Received message: " << msg->get_payload() <<
+    //     std::endl;
+    // }
 
     try {
+        if (j.contains("message_type") && j["message_type"] == "score") {
+            score_ = j.template get<robot_client::Score>();
+            return;
+        }
+
         // Convert JSON to robot_client::Sensors
         auto sensors = j.template get<robot_client::Sensors>();
-
-        // Print the received sensors data
-        std::cout << "[INFO] Received sensors data: " << std::endl;
-        for (const auto &sensor : sensors.sensors) {
-            std::cout << "  Sensor Name: " << sensor.name << std::endl;
-            std::cout << "  Data: ";
-            for (const auto &value : sensor.data) {
-                std::cout << value << " ";
-            }
-            std::cout << std::endl;
-            std::cout << "  Unit: " << sensor.unit << std::endl;
-            std::cout << "  Timestamp: " << sensor.timestamp << std::endl;
-        }
 
         // Call the custom message callback
         if (message_cb_) {
@@ -92,6 +88,10 @@ void RobotClient::sendInputMessage(Input input) {
     json response = input;
     client_.send(connection_hdl_, response.dump(),
                  websocketpp::frame::opcode::text);
+}
+
+std::optional<robot_client::Score> RobotClient::getScore() const {
+    return score_;
 }
 
 void RobotClient::run() { client_.run(); }

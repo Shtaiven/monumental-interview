@@ -19,6 +19,33 @@ void message_cb(robot_client::RobotClient *c,
     static robot_model::RobotModel robot_model;
     static double path_eval_time = 0.0;
     static robot_client::Input last_input{0, 0};
+    static bool score_received = false;
+
+    // If the score is received, stop processing further messages
+    if (score_received) {
+        return;
+    }
+
+    // If the score is received for the first time, print it and return
+    if (c->getScore().has_value() && !score_received) {
+        score_received = true;
+        auto score = c->getScore().value();
+        std::cout << "[INFO] Received score: " << score.score << std::endl;
+        return;
+    }
+
+    // Print the received sensors data
+    std::cout << "[INFO] Received sensors data: " << std::endl;
+    for (const auto &sensor : sensors.sensors) {
+        std::cout << "  Sensor Name: " << sensor.name << std::endl;
+        std::cout << "  Data: ";
+        for (const auto &value : sensor.data) {
+            std::cout << value << " ";
+        }
+        std::cout << std::endl;
+        std::cout << "  Unit: " << sensor.unit << std::endl;
+        std::cout << "  Timestamp: " << sensor.timestamp << std::endl;
+    }
 
     // Update the robot model with new sensor data
     robot_model.update(sensors);

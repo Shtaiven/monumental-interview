@@ -3,6 +3,7 @@
 #include <functional>
 #include <iostream>
 #include <nlohmann/json.hpp>
+#include <optional>
 #include <string>
 #include <vector>
 #include <websocketpp/client.hpp>
@@ -34,6 +35,13 @@ struct Input {
 
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(Input, v_left, v_right)
 
+struct Score {
+    std::string message_type;
+    double score;
+};
+
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(Score, message_type, score)
+
 class RobotClient;  // forward declaration for typedef
 
 using MessageCallback = std::function<void(RobotClient *, const Sensors)>;
@@ -47,6 +55,7 @@ class RobotClient {
     void run();
     void set_message_cb(MessageCallback cb) { message_cb_ = cb; };
     void sendInputMessage(Input input);
+    std::optional<Score> getScore() const;
 
    private:
     void onMessage(websocketpp::connection_hdl hdl,
@@ -57,6 +66,7 @@ class RobotClient {
     bool connected_;
     std::string uri_;
     nlohmann::json sensors_data_;
+    std::optional<robot_client::Score> score_{std::nullopt};
     MessageCallback message_cb_ = NULL;
 };
 
