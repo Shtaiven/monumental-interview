@@ -3,10 +3,10 @@
 #include <cmath>
 
 // PD gains
-#define K_P_THETA 0.1
-#define K_D_THETA 0.01
-#define K_P_POSITION 1.0
-#define K_D_POSITION 0.2
+#define K_P_THETA 1.0
+#define K_D_THETA 0.3
+#define K_P_POSITION 0.4
+#define K_D_POSITION 0.3
 
 robot_client::Input controller(const robot_model::RobotModel &model,
                                const Vec2 &setpoint) {
@@ -23,7 +23,7 @@ robot_client::Input controller(const robot_model::RobotModel &model,
     double dt = (last_time > 0.0) ? (current_time - last_time) : 0.05;
 
     // Stop if close enough
-    if (distance <= 0.25) {
+    if (distance <= 0.05) {
         last_theta_diff = 0.0;
         last_distance = 0.0;
         last_time = current_time;
@@ -55,8 +55,9 @@ robot_client::Input controller(const robot_model::RobotModel &model,
     double v_right = linear_velocity + angular_velocity;
 
     // Clamp wheel velocities
-    v_left = std::max(-2.0, std::min(2.0, v_left));
-    v_right = std::max(-2.0, std::min(2.0, v_right));
+    double max_wheel_speed = 1.5;  // m/s
+    v_left = std::max(-max_wheel_speed, std::min(max_wheel_speed, v_left));
+    v_right = std::max(-max_wheel_speed, std::min(max_wheel_speed, v_right));
 
     last_theta_diff = theta_diff;
     last_distance = distance;

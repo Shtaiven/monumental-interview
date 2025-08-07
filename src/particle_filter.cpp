@@ -26,6 +26,9 @@ void ParticleFilter::predict(double dt, double gyro_z, double acc_x,
     std::normal_distribution<double> noise_y(0, std_motion[1]);
     std::normal_distribution<double> noise_theta(0, std_motion[2]);
     for (auto& p : particles_) {
+        // Update theta first
+        p.theta += gyro_z * dt + noise_theta(gen_);
+
         // Rotate acceleration to global frame
         double ax_global =
             std::cos(p.theta) * acc_x - std::sin(p.theta) * acc_y;
@@ -35,7 +38,6 @@ void ParticleFilter::predict(double dt, double gyro_z, double acc_x,
         // Simple integration (no velocity state)
         p.x += 0.5 * ax_global * dt * dt + noise_x(gen_);
         p.y += 0.5 * ay_global * dt * dt + noise_y(gen_);
-        p.theta += gyro_z * dt + noise_theta(gen_);
     }
 }
 

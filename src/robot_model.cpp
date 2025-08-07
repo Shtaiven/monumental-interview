@@ -41,10 +41,7 @@ static std::optional<int64_t> stringToTimestampMillis(
     return millis;
 }
 
-RobotModel::RobotModel() {
-    double std_pos[3] = {0.2, 0.2, 0.05};  // initial uncertainty
-    pf_.init(0, 0, 0, std_pos);
-}
+RobotModel::RobotModel() { pf_.init(0, 0, 0, std_pos_); }
 
 double RobotModel::getLifetimeSeconds() const {
     if (!angular_vel_time_.has_value() || !gps_pos_time_.has_value() ||
@@ -85,17 +82,21 @@ void RobotModel::update(const robot_client::Sensors &sensors) {
                                gps_pos_time_.value_or(0.0));
     }
 
-    double dt = 0.05;  // Default to 20Hz
     if (last_linear_acc_time_.has_value() && linear_acc_time_.has_value()) {
-        dt = (*linear_acc_time_ - *last_linear_acc_time_) / 1000.0;
-        if (dt <= 0.0) dt = 0.05;
+        double dt = (*linear_acc_time_ - *last_linear_acc_time_) /
+                    1000.0;  // Convert to seconds
+        if (dt <= 0.0) {
+            dt = 0.05;
+        }
+        pf_.predict(dt, angular_vel_, linear_acc_.x, linear_acc_.y,
+                    std_motion_);
     }
 
-    double std_motion[3] = {0.1, 0.1, 0.1};  // IMU noise
-    pf_.predict(dt, angular_vel_, linear_acc_.x, linear_acc_.y, std_motion);
-
-    double std_gps[2] = {0.05, 0.05};  // GPS noise
-    pf_.updateGPS(gps_pos_.x, gps_pos_.y, std_gps);
+    // Update the particle filter with GPS data if available
+    if (gps_pos_time_.has_value() && last_gps_pos_time_.has_value() &&
+        *gps_pos_time_ > *last_gps_pos_time_) {
+        pf_.updateGPS(gps_pos_.x, gps_pos_.y, std_gps_);
+    }
 }
 
 }  // namespace robot_model

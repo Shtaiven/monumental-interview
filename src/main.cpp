@@ -34,14 +34,14 @@ void message_cb(robot_client::RobotClient *c,
 
     // Get the point in the path to target
     // auto setpoint = path_generator::eval(path_eval_time);
-    // auto setpoint = path_generator::eval(lifetime);
-    auto setpoint = path_generator::eval(5);
+    auto setpoint = path_generator::eval(lifetime);
+    // auto setpoint = path_generator::eval(5);
     std::cout << "[INFO] Setpoint: " << setpoint.x << " " << setpoint.y
               << std::endl;
 
     // Compute the next robot input
-    // auto input = controller(robot_model, setpoint);
-    robot_client::Input input{0.5, 0.5};
+    auto input = controller(robot_model, setpoint);
+    // robot_client::Input input{0.5, 0.5};
 
     auto current_pos = robot_model.getPosition();
     Vec2 distance_vec{setpoint.x - current_pos.x, setpoint.y - current_pos.y};

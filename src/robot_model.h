@@ -50,6 +50,9 @@ class RobotModel {
     double gps_noise_ = 0.12;  // meters
 
     ParticleFilter pf_{500};
+    double std_pos_[3] = {0, 0, 0};           // initial uncertainty
+    double std_motion_[3] = {0.1, 0.1, 0.1};  // IMU noise (m/s^2, m/s^2, rad/s)
+    double std_gps_[2] = {0.05, 0.05};        // GPS noise
 };
 
 }  // namespace robot_model
