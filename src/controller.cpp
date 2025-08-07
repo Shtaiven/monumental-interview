@@ -5,8 +5,8 @@
 // PD gains
 #define K_P_THETA 1.0
 #define K_D_THETA 0.3
-#define K_P_POSITION 0.4
-#define K_D_POSITION 0.3
+#define K_P_POSITION 0.5
+#define K_D_POSITION 0.2
 
 robot_client::Input controller(const robot_model::RobotModel &model,
                                const Vec2 &setpoint) {

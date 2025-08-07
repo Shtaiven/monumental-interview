@@ -42,34 +42,65 @@ void ParticleFilter::predict(double dt, double gyro_z, double acc_x,
 }
 
 void ParticleFilter::updateGPS(double gps_x, double gps_y, double std_gps[2]) {
+    static double previous_gps_x = gps_x;  // Track previous GPS x
+    static double previous_gps_y = gps_y;  // Track previous GPS y
+
+    // Calculate estimated heading (orientation) from GPS position difference
+    double gps_heading =
+        std::atan2(gps_y - previous_gps_y, gps_x - previous_gps_x);
+
+    // Noise distributions
     std::normal_distribution<double> gps_noise_x(0, std_gps[0]);
     std::normal_distribution<double> gps_noise_y(0, std_gps[1]);
+    std::normal_distribution<double> gps_noise_theta(
+        0, 0.1);  // Optional orientation noise
+
     double sum_weights = 0.0;
+
     for (auto& p : particles_) {
+        // Calculate position difference
         double dx = p.x - gps_x + gps_noise_x(gen_);
         double dy = p.y - gps_y + gps_noise_y(gen_);
-        // Gaussian likelihood
-        double weight = std::exp(-0.5 * (dx * dx / (std_gps[0] * std_gps[0]) +
-                                         dy * dy / (std_gps[1] * std_gps[1])));
+
+        // Calculate orientation difference (use gps_heading as reference)
+        double dtheta = p.theta - gps_heading + gps_noise_theta(gen_);
+
+        // Gaussian likelihood for position AND orientation
+        double weight = std::exp(
+            -0.5 *
+            ((dx * dx / (std_gps[0] * std_gps[0])) +
+             (dy * dy / (std_gps[1] * std_gps[1])) +
+             (dtheta * dtheta /
+              (0.1 * 0.1))  // Optional standard deviation for orientation
+             ));
         p.weight = weight;
         sum_weights += weight;
-    }
-    // Normalize weights
-    for (auto& p : particles_) p.weight /= sum_weights;
 
-    // Resample
+        // Correct the particle theta by adjusting toward the GPS heading
+        // difference
+        p.theta += 0.2 * dtheta;  // The factor (0.2) determines how much
+                                  // particles correct orientation
+    }
+
+    // Normalize weights
+    for (auto& p : particles_) {
+        p.weight /= sum_weights;
+    }
+
+    // Resample (unchanged from the existing logic)
     std::vector<Particle> new_particles;
     std::uniform_real_distribution<double> dist(0.0, 1.0);
     double step = 1.0 / particles_.size();
     double beta = 0.0;
     size_t index = size_t(dist(gen_) * particles_.size());
-    double mw = std::max_element(particles_.begin(), particles_.end(),
-                                 [](const Particle& a, const Particle& b) {
-                                     return a.weight < b.weight;
-                                 })
-                    ->weight;
+    double max_weight =
+        std::max_element(particles_.begin(), particles_.end(),
+                         [](const Particle& a, const Particle& b) {
+                             return a.weight < b.weight;
+                         })
+            ->weight;
     for (size_t i = 0; i < particles_.size(); ++i) {
-        beta += dist(gen_) * 2.0 * mw;
+        beta += dist(gen_) * 2.0 * max_weight;
         while (beta > particles_[index].weight) {
             beta -= particles_[index].weight;
             index = (index + 1) % particles_.size();
@@ -77,6 +108,10 @@ void ParticleFilter::updateGPS(double gps_x, double gps_y, double std_gps[2]) {
         new_particles.push_back(particles_[index]);
     }
     particles_ = std::move(new_particles);
+
+    // Update previous GPS position
+    previous_gps_x = gps_x;
+    previous_gps_y = gps_y;
 }
 
 Vec2 ParticleFilter::getPosition() const {
