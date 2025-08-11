@@ -70,3 +70,7 @@ The visualizer is written with Qt6 and uses the `paintEvent` to update based on 
 > ❌ The cyan X is the current setpoint.
 
 > ⚫ The translucent gray dots are the positions of the particles from the particle filter.
+
+## Video
+
+<video src="img/robot-client.mp4" width="640" height="480" controls></video>
