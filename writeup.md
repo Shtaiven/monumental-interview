@@ -73,4 +73,4 @@ The visualizer is written with Qt6 and uses the `paintEvent` to update based on 
 
 ## Video
 
-[Download the MP4](img/robot-client.mp4)
+[Download the MP4](https://github.com/Shtaiven/monumental-interview/raw/main/img/robot-client.mp4)
