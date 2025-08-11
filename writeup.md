@@ -73,4 +73,4 @@ The visualizer is written with Qt6 and uses the `paintEvent` to update based on 
 
 ## Video
 
-<video src="img/robot-client.mp4" width="640" height="480" controls></video>
+[Download the MP4](img/robot-client.mp4)
