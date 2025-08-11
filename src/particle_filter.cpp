@@ -66,13 +66,9 @@ void ParticleFilter::updateGPS(double gps_x, double gps_y, double std_gps[2]) {
         double dtheta = p.theta - gps_heading + gps_noise_theta(gen_);
 
         // Gaussian likelihood for position AND orientation
-        double weight = std::exp(
-            -0.5 *
-            ((dx * dx / (std_gps[0] * std_gps[0])) +
-             (dy * dy / (std_gps[1] * std_gps[1])) +
-             (dtheta * dtheta /
-              (0.1 * 0.1))  // Optional standard deviation for orientation
-             ));
+        double weight = std::exp(-0.5 * ((dx * dx / (std_gps[0] * std_gps[0])) +
+                                         (dy * dy / (std_gps[1] * std_gps[1])) +
+                                         (dtheta * dtheta / (0.1 * 0.1))));
         p.weight = weight;
         sum_weights += weight;
 
