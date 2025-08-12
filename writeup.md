@@ -62,17 +62,12 @@ The visualizer is written with Qt6 and uses the `paintEvent` to update based on 
 
 ### Key
 
-> <font color="red">The red circle is the robot body, with 2 gray circles representing the wheels</font>
-
-> <font color="yellow">The yellow line denotes the robot's heading.</font>
-
-> <font color="green"> The green line denotes the path taken by the robot.</font>
-
-> <font color="blue">The blue line is the full path that the robot should follow (Leminiscate of Gerono).</font>
-
-> <font color="cyan">The cyan X is the current setpoint.</font>
-
-> <font color="gray">The translucent gray dots are the positions of the particles from the particle filter.</font>
+- <font color="red">The red circle is the robot body, with 2 gray circles representing the wheels</font>
+- <font color="yellow">The yellow line denotes the robot's heading.</font>
+- <font color="green"> The green line denotes the path taken by the robot.</font>
+- <font color="blue">The blue line is the full path that the robot should follow (Leminiscate of Gerono).</font>
+- <font color="cyan">The cyan X is the current setpoint.</font>
+- <font color="gray">The translucent gray dots are the positions of the particles from the particle filter.</font>
 
 ## Future Improvements
 
