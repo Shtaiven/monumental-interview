@@ -2,7 +2,7 @@
 
 ## Quick Start
 
-A statically-compiled binary `robot-client` is provided in the root directory. You can run
+A statically-compiled x86_64 linux binary `robot-client` is provided in the root directory. You can run
 
 ```bash
 ./robot-client "ws://91.99.103.188:8765"
