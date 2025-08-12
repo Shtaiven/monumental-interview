@@ -17,7 +17,6 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/linux-64/cairo-1.18.4-h3394656_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/clang-format-20-20.1.7-default_h1df26ce_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/clang-format-20.1.7-default_h1df26ce_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/linux-64/clang-tools-20.1.7-default_h1df26ce_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/cmake-3.29.6-hcafd917_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/cyrus-sasl-2.1.28-hd9c7081_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/dbus-1.16.2-h3c4dab8_0.conda
@@ -290,24 +289,6 @@ packages:
   license_family: Apache
   size: 68266
   timestamp: 1749876630650
-- conda: https://conda.anaconda.org/conda-forge/linux-64/clang-tools-20.1.7-default_h1df26ce_0.conda
-  sha256: a992143c7497fab154a68c0ecd929c3b828b98a94a9a7d3d3d0a14a455b83743
-  md5: 16ffe9ef068a1fe54dfa6e65956473f5
-  depends:
-  - __glibc >=2.17,<3.0.a0
-  - clang-format 20.1.7 default_h1df26ce_0
-  - libclang-cpp20.1 >=20.1.7,<20.2.0a0
-  - libclang13 >=20.1.7
-  - libgcc >=13
-  - libllvm20 >=20.1.7,<20.2.0a0
-  - libstdcxx >=13
-  - libxml2 >=2.13.8,<2.14.0a0
-  constrains:
-  - clangdev 20.1.7
-  license: Apache-2.0 WITH LLVM-exception
-  license_family: Apache
-  size: 21601027
-  timestamp: 1749876727993
 - conda: https://conda.anaconda.org/conda-forge/linux-64/cmake-3.29.6-hcafd917_0.conda
   sha256: a788df92bf0e6e02d13ebc4e14e8bc56c80186f976200537799426aafc0e51ab
   md5: b1084336535950b28485bb93653ca152

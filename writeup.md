@@ -7,7 +7,7 @@ Each section lists it's relevant files, describes the implementation at a high l
 - `pixi.toml`
 - `CMakeLists.txt`
 
-This is a C++ project build with cmake, with a few dependencies including nlohmann json, websocketpp, qt6, boost, and opengl. To install these dependencies, pixi is used to install packages and solve dependencies and is compatible with many systems. A bootstrap script installs pixi, and scripts are provided to allow for quick building, formatting, and starting the application through pixi's `run` command.
+This is a C++ project built with cmake, with a few dependencies including nlohmann json, websocketpp, qt6, boost, and opengl. To install these dependencies, pixi is used to install packages and solve dependencies and is compatible with many systems. A bootstrap script installs pixi, and scripts are provided to allow for quick building, formatting, and starting the application through pixi's `run` command.
 
 ## Main Application Loop
 
@@ -56,20 +56,30 @@ Other controllers like Model-Predictive control, Linear Parameter Varying contro
 - `visualizer.h`
 - `visualizer.cpp`
 
-The visualizer is written with Qt6 and uses the `paintEvent` to update based on state information. The robot model, path, and setpoint are provided to the visualizer. The robot body is draws in red. The image below explains the visualization. Sensor data and state information is simply printed to the console. This could be added to the visualizer. A key, a scale for distance, better particle visualizations, wheel velocities, and interactivity with the mouse for dragging and zooming could improve the visualizer.
+The visualizer is written with Qt6 and uses the `paintEvent` to update based on state information. The robot model, path, and setpoint are provided to the visualizer. The image below explains the visualization. Sensor data and state information is simply printed to the console. This could be added to the visualizer. A key, a scale for distance, better particle visualizations, wheel velocities, and interactivity with the mouse for dragging and zooming could improve the visualizer.
 
 ![The robot-client visualizer](img/visualizer.png)
-> 🔴 The red circle is the robot body, with 2 gray circles representing the wheels.
 
-> 🟡 The yellow line denotes the robot's heading.
+### Key
 
-> 🟢 The green line denotes the path taken by the robot.
+> <font color="red">The red circle is the robot body, with 2 gray circles representing the wheels</font>
 
-> 🔵 The blue line is the full path that the robot should follow (Leminiscate of Gerono).
+> <font color="yellow">The yellow line denotes the robot's heading.</font>
 
-> ❌ The cyan X is the current setpoint.
+> <font color="green"> The green line denotes the path taken by the robot.</font>
 
-> ⚫ The translucent gray dots are the positions of the particles from the particle filter.
+> <font color="blue">The blue line is the full path that the robot should follow (Leminiscate of Gerono).</font>
+
+> <font color="cyan">The cyan X is the current setpoint.</font>
+
+> <font color="gray">The translucent gray dots are the positions of the particles from the particle filter.</font>
+
+## Future Improvements
+
+Other than what was already mentioned:
+
+* Code cleanup and CI
+* Unit/Integration testing
 
 ## Video
 
