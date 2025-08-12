@@ -1,5 +1,17 @@
 # Monumental Interview Assignment
 
+## Quick Start
+
+A statically-compiled binary `robot-client` is provided in the root directory. You can run
+
+```bash
+./robot-client "ws://91.99.103.188:8765"
+```
+
+If this works, you can skip installation and building below.
+
+You can use Ctrl-C to quit the application.
+
 ## Installation
 
 To bootstrap an amd64 linux system with `bash` and either `wget` or `curl`, enter the command
